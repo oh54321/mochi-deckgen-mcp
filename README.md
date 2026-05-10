@@ -13,7 +13,7 @@ Generate Mochi / Anki flashcard decks from a topic description. Two run modes: a
 ### Option A — API script
 
 ```bash
-git clone <repo-url> DeckGeneration && cd DeckGeneration
+git clone https://github.com/oh54321/spaced-repetition-deck-generation.git && cd spaced-repetition-deck-generation
 pip install -e .
 cp .env.example .env       # paste your ANTHROPIC_API_KEY
 python scripts/generate.py
@@ -30,7 +30,7 @@ python scripts/generate.py \
 ### Option B — Claude Code skill
 
 ```bash
-git clone <repo-url> DeckGeneration && cd DeckGeneration
+git clone https://github.com/oh54321/spaced-repetition-deck-generation.git && cd spaced-repetition-deck-generation
 ln -s "$(pwd)/.claude/skills/deck-generation" ~/.claude/skills/deck-generation
 claude                     # opens Claude Code here
 > /deck-generation
