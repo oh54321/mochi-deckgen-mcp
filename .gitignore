@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+decks/raw/*
+!decks/raw/.gitkeep
+decks/exported/*
+!decks/exported/.gitkeep
+.venv/
