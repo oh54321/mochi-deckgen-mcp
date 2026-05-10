@@ -22,6 +22,15 @@ class MochiClient:
             transport=_transport,
         )
 
+    def close(self) -> None:
+        self._client.close()
+
+    def __enter__(self) -> "MochiClient":
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.close()
+
     def _request(self, method: str, path: str, **kwargs: Any) -> Any:
         for attempt in range(MAX_RETRIES):
             try:
