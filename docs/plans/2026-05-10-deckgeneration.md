@@ -1199,7 +1199,7 @@ Role: card_generator.
 
 You write one flashcard in markdown.
 
-Inputs (in the user message): outline line, research facts, deck clarification answers, optional local image path, optional critique from a prior verifier.
+Inputs (in the user message): outline line, research facts, deck clarification answers, optional local image path, optional critique from a prior review.
 
 Output ONLY the markdown card, in this exact format:
 
