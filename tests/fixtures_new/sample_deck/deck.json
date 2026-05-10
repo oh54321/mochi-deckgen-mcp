@@ -1,0 +1,8 @@
+{
+  "name": "Sample",
+  "description": "Three-card fixture for tests",
+  "created_at": "2026-05-10T00:00:00Z",
+  "generator_version": "0.1.0",
+  "source_topic": "test fixture",
+  "follow_up_answers": {}
+}
