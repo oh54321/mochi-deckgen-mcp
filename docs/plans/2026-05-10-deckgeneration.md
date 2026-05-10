@@ -284,7 +284,7 @@ from pathlib import Path
 
 TAGS_RE = re.compile(r"^Tags:\s*((?:#\S+\s*)+)$", re.MULTILINE)
 IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
-SPLIT_RE = re.compile(r"(?m)^---\s*$")
+SPLIT_RE = re.compile(r"(?m)^---\s*\n\s*\n")  # `---` line followed by a blank line
 
 
 @dataclass
