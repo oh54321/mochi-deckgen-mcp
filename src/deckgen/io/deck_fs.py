@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -33,3 +34,29 @@ def read_card(path: Path) -> Card:
 
     images = [Path(p) for p in IMAGE_RE.findall(front + "\n" + back)]
     return Card(front_md=front, back_md=back, tags=tags, image_paths=images, source_path=Path(path))
+
+
+@dataclass
+class Deck:
+    name: str
+    description: str
+    cards: list[Card]
+    metadata: dict
+    folder: Path
+
+
+def read_deck(folder: Path) -> Deck:
+    folder = Path(folder)
+    meta = json.loads((folder / "deck.json").read_text(encoding="utf-8"))
+    cards = [
+        read_card(p)
+        for p in sorted(folder.glob("card-*.md"))
+        if not p.name.endswith(".broken")
+    ]
+    return Deck(
+        name=meta["name"],
+        description=meta.get("description", ""),
+        cards=cards,
+        metadata=meta,
+        folder=folder,
+    )
