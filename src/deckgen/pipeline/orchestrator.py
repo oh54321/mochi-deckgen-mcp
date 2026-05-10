@@ -37,7 +37,7 @@ def _write_deck_json(folder: Path, inputs: GenerationInputs) -> None:
     (folder / "deck.json").write_text(json.dumps({
         "name": inputs.name,
         "description": inputs.description,
-        "created_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "created_at": _dt.datetime.now(_dt.UTC).isoformat().replace("+00:00", "Z"),
         "generator_version": "0.1.0",
         "source_topic": inputs.topic,
         "follow_up_answers": inputs.follow_ups,
