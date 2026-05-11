@@ -9,15 +9,15 @@ class FakeMochi:
         self.updated_cards: list = []
         self.next_id = 0
 
-    def create_deck(self, name, parent_id=None):
+    def create_deck(self, name, parent_id=None, **extra):
         self.next_id += 1
-        d = {"id": f"d{self.next_id}", "name": name}
+        d = {"id": f"d{self.next_id}", "name": name, "parent-id": parent_id}
         self.created_decks.append(d)
         return d
 
-    def create_card(self, deck_id, content, template_id=None, fields=None):
+    def create_card(self, deck_id, content, template_id=None, fields=None, **extra):
         self.next_id += 1
-        c = {"id": f"c{self.next_id}", "deck-id": deck_id, "content": content}
+        c = {"id": f"c{self.next_id}", "deck-id": deck_id, "content": content, **extra}
         self.created_cards.append(c)
         return c
 

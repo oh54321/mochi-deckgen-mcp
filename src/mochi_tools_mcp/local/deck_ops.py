@@ -27,17 +27,50 @@ def _now() -> str:
     return _dt.datetime.now(_dt.UTC).isoformat().replace("+00:00", "Z")
 
 
+def _deck_folder(root: Path, name: str) -> Path:
+    """Resolve a deck name (possibly containing slashes) to its folder."""
+    return _raw(root).joinpath(*name.split("/"))
+
+
 def create_deck(
     root: Path, name: str, description: str = "", parent_name: str | None = None
 ) -> dict[str, Any]:
-    folder = _raw(root) / name
-    if folder.exists():
+    """Create a deck. `name` may contain slashes for nesting (e.g. 'Languages/Spanish').
+
+    Any path segments that don't yet have a deck.json get auto-promoted to empty
+    decks so the Mochi hierarchy will mirror the local folder structure on push.
+    """
+    folder = _deck_folder(root, name)
+    if folder.exists() and (folder / "deck.json").exists():
         raise FileExistsError(f"Deck {name} already exists at {folder}")
-    folder.mkdir(parents=True)
+
+    # Auto-create each ancestor that lacks deck.json (without overwriting any that exist).
+    parts = name.split("/")
+    for i in range(1, len(parts)):
+        ancestor = "/".join(parts[:i])
+        ancestor_folder = _deck_folder(root, ancestor)
+        if (ancestor_folder / "deck.json").exists():
+            continue
+        ancestor_folder.mkdir(parents=True, exist_ok=True)
+        ancestor_parent = "/".join(parts[: i - 1]) or None
+        (ancestor_folder / "deck.json").write_text(
+            json.dumps(
+                {
+                    "name": ancestor,
+                    "description": "",
+                    "parent_name": ancestor_parent,
+                    "created_at": _now(),
+                },
+                indent=2,
+            )
+        )
+
+    folder.mkdir(parents=True, exist_ok=True)
+    parent_from_path = "/".join(parts[:-1]) or None
     meta = {
         "name": name,
         "description": description,
-        "parent_name": parent_name,
+        "parent_name": parent_name or parent_from_path,
         "created_at": _now(),
     }
     (folder / "deck.json").write_text(json.dumps(meta, indent=2))
@@ -53,8 +86,8 @@ def write_card(
     tags: list[str] | None = None,
     image_filename: str | None = None,
 ) -> str:
-    folder = _raw(root) / deck
-    if not folder.exists():
+    folder = _deck_folder(root, deck)
+    if not (folder / "deck.json").exists():
         raise FileNotFoundError(f"Deck {deck} does not exist")
     body = front_md
     if image_filename and f"]({image_filename})" not in body:
@@ -69,7 +102,7 @@ def write_card(
 
 
 def read_card(root: Path, deck: str, index: int) -> dict[str, Any]:
-    p = _raw(root) / deck / CARD_PAT.format(i=index)
+    p = _deck_folder(root, deck) / CARD_PAT.format(i=index)
     c = _read_card_file(p)
     return {
         "front_md": c.front_md,
@@ -81,19 +114,36 @@ def read_card(root: Path, deck: str, index: int) -> dict[str, Any]:
 
 
 def list_decks(root: Path) -> list[dict[str, Any]]:
+    """Walk the raw/ tree and return every directory with a deck.json.
+
+    Names are slash-joined relative to raw/ (e.g. 'Languages/Spanish').
+    Result is sorted depth-first so parents appear before children.
+    """
     raw = _raw(root)
     if not raw.exists():
         return []
     result = []
-    for folder in sorted(p for p in raw.iterdir() if p.is_dir()):
+    for deck_json in sorted(raw.rglob("deck.json")):
+        folder = deck_json.parent
+        relative = folder.relative_to(raw)
+        name = "/".join(relative.parts)
         cards = list(folder.glob("card-*.md"))
         has_map = (folder / ".mochi.json").exists()
-        result.append({"name": folder.name, "card_count": len(cards), "has_mochi_mapping": has_map})
+        parent_name = "/".join(name.split("/")[:-1]) or None
+        result.append(
+            {
+                "name": name,
+                "card_count": len(cards),
+                "has_mochi_mapping": has_map,
+                "parent_name": parent_name,
+                "depth": len(name.split("/")) - 1,
+            }
+        )
     return result
 
 
 def list_cards(root: Path, deck: str) -> list[dict[str, Any]]:
-    folder = _raw(root) / deck
+    folder = _deck_folder(root, deck)
     cards = []
     for p in sorted(folder.glob("card-*.md")):
         index = int(p.stem.split("-")[1])
@@ -110,7 +160,7 @@ def list_cards(root: Path, deck: str) -> list[dict[str, Any]]:
 
 
 def _move_to_trash(src: Path, root: Path, sub: str) -> Path:
-    trash = _trash(root) / sub / _now().replace(":", "-")
+    trash = _trash(root) / sub.replace("/", "__") / _now().replace(":", "-")
     trash.mkdir(parents=True, exist_ok=True)
     dest = trash / src.name
     shutil.move(str(src), str(dest))
@@ -118,14 +168,15 @@ def _move_to_trash(src: Path, root: Path, sub: str) -> Path:
 
 
 def delete_card(root: Path, deck: str, index: int) -> str:
-    p = _raw(root) / deck / CARD_PAT.format(i=index)
+    p = _deck_folder(root, deck) / CARD_PAT.format(i=index)
     return str(_move_to_trash(p, root, deck))
 
 
 def delete_deck(root: Path, deck: str) -> str:
-    folder = _raw(root) / deck
+    folder = _deck_folder(root, deck)
     trash = _trash(root)
     trash.mkdir(parents=True, exist_ok=True)
-    dest = trash / f"{deck}-{_now().replace(':', '-')}"
+    safe = deck.replace("/", "__")
+    dest = trash / f"{safe}-{_now().replace(':', '-')}"
     shutil.move(str(folder), str(dest))
     return str(dest)

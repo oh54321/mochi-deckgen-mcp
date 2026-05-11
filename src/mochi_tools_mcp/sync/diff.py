@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import Any
 
 from mochi_tools_mcp.local.deck_fs import read_deck
-from mochi_tools_mcp.sync.mapping import hash_text, load_mapping
-from mochi_tools_mcp.sync.push import _card_content
+from mochi_tools_mcp.sync.mapping import load_mapping
+from mochi_tools_mcp.sync.push import _hash_basis
 
 
 def sync_status(decks_root: Path, deck_name: str, mochi_client: Any) -> list[dict[str, Any]]:
-    folder = Path(decks_root) / "raw" / deck_name
+    folder = Path(decks_root, "raw", *deck_name.split("/"))
     deck = read_deck(folder)
     mapping = load_mapping(folder)
     rows: list[dict[str, Any]] = []
@@ -17,7 +17,7 @@ def sync_status(decks_root: Path, deck_name: str, mochi_client: Any) -> list[dic
     local_by_name: dict[str, str] = {}
     for c in deck.cards:
         name = c.source_path.name if c.source_path else ""
-        local_by_name[name] = hash_text(_card_content(c.front_md, c.back_md, c.tags))
+        local_by_name[name] = _hash_basis(c.front_md, c.back_md, c.tags)
 
     remote_ids: set[str] = set()
     if mapping:

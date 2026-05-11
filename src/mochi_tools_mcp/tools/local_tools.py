@@ -53,12 +53,12 @@ def collect() -> list[dict[str, Any]]:
         return {"trashed_to": deck_ops.delete_deck(root(), name)}
 
     def local_fetch_image(url: str, deck: str, max_edge_px: int = 1024) -> dict[str, Any]:
-        dest = root() / "raw" / deck / "images"
+        dest = Path(root(), "raw", *deck.split("/"), "images")
         p = image_fetch.fetch_image(url, dest, max_edge_px)
         return {"path": str(p) if p else None}
 
     def local_fetch_wikipedia_image(query: str, deck: str) -> dict[str, Any] | None:
-        dest = root() / "raw" / deck / "images"
+        dest = Path(root(), "raw", *deck.split("/"), "images")
         return image_wikipedia.fetch_wikipedia_image(query, dest)
 
     def local_import_image(
@@ -67,7 +67,7 @@ def collect() -> list[dict[str, Any]]:
         base64_data: str | None = None,
         filename: str | None = None,
     ) -> dict[str, Any]:
-        dest = root() / "raw" / deck / "images"
+        dest = Path(root(), "raw", *deck.split("/"), "images")
         p = image_import.import_image(
             dest,
             file_path=Path(file_path) if file_path else None,
@@ -77,7 +77,7 @@ def collect() -> list[dict[str, Any]]:
         return {"path": p}
 
     def local_check_malformed(deck: str, index: int | None = None) -> Any:
-        folder = root() / "raw" / deck
+        folder = Path(root(), "raw", *deck.split("/"))
         if index is not None:
             return malformed_check.check_card_file(folder / f"card-{index:03d}.md")
         results: dict[int, Any] = {}

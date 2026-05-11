@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 from mochi_tools_mcp.config import decks_root, mochi_api_key
@@ -48,7 +49,7 @@ def collect() -> list[dict[str, Any]]:
         return sync_status(decks_root(), deck, c)
 
     def sync_link(deck: str, deck_id: str, deck_name_on_mochi: str | None = None) -> dict[str, Any]:
-        folder = decks_root() / "raw" / deck
+        folder = Path(decks_root(), "raw", *deck.split("/"))
         m = Mapping(deck_id=deck_id, deck_name_on_mochi=deck_name_on_mochi or deck)
         save_mapping(folder, m)
         return {"linked": str(folder), "deck_id": deck_id}

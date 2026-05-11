@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 import time
 from typing import Any
 
@@ -25,6 +26,10 @@ class MochiClient:
             timeout=30.0,
             transport=_transport,
         )
+        # Mochi docs: "API calls are limited to one concurrent request per account."
+        # This lock enforces the constraint so workflows that parallelize subagent
+        # dispatch never accidentally hammer the API.
+        self._request_lock = threading.Lock()
 
     def close(self) -> None:
         self._client.close()
@@ -41,6 +46,10 @@ class MochiClient:
         self.close()
 
     def _request(self, method: str, path: str, **kwargs: Any) -> Any:
+        with self._request_lock:
+            return self._request_locked(method, path, **kwargs)
+
+    def _request_locked(self, method: str, path: str, **kwargs: Any) -> Any:
         for attempt in range(MAX_RETRIES):
             try:
                 r = self._client.request(method, path, **kwargs)
@@ -73,10 +82,35 @@ class MochiClient:
     def get_deck(self, deck_id: str) -> dict[str, Any]:
         return self._request("GET", f"/decks/{deck_id}")  # type: ignore[no-any-return]
 
-    def create_deck(self, name: str, parent_id: str | None = None) -> dict[str, Any]:
-        body: dict[str, str] = {"name": name}
+    def create_deck(
+        self,
+        name: str,
+        parent_id: str | None = None,
+        sort: int | None = None,
+        archived: bool | None = None,
+        sort_by: str | None = None,
+        cards_view: str | None = None,
+        show_sides: bool | None = None,
+        sort_by_direction: bool | None = None,
+        review_reverse: bool | None = None,
+    ) -> dict[str, Any]:
+        body: dict[str, Any] = {"name": name}
         if parent_id:
             body["parent-id"] = parent_id
+        if sort is not None:
+            body["sort"] = sort
+        if archived is not None:
+            body["archived?"] = archived
+        if sort_by is not None:
+            body["sort-by"] = sort_by
+        if cards_view is not None:
+            body["cards-view"] = cards_view
+        if show_sides is not None:
+            body["show-sides?"] = show_sides
+        if sort_by_direction is not None:
+            body["sort-by-direction"] = sort_by_direction
+        if review_reverse is not None:
+            body["review-reverse?"] = review_reverse
         return self._request("POST", "/decks/", json=body)  # type: ignore[no-any-return]
 
     def update_deck(self, deck_id: str, **fields: Any) -> dict[str, Any]:
@@ -106,12 +140,24 @@ class MochiClient:
         content: str,
         template_id: str | None = None,
         fields: dict[str, Any] | None = None,
+        manual_tags: list[str] | None = None,
+        archived: bool | None = None,
+        review_reverse: bool | None = None,
+        pos: str | None = None,
     ) -> dict[str, Any]:
         body: dict[str, Any] = {"deck-id": deck_id, "content": content}
         if template_id:
             body["template-id"] = template_id
         if fields:
             body["fields"] = fields
+        if manual_tags is not None:
+            body["manual-tags"] = manual_tags
+        if archived is not None:
+            body["archived?"] = archived
+        if review_reverse is not None:
+            body["review-reverse?"] = review_reverse
+        if pos is not None:
+            body["pos"] = pos
         return self._request("POST", "/cards/", json=body)  # type: ignore[no-any-return]
 
     def update_card(self, card_id: str, **fields: Any) -> dict[str, Any]:

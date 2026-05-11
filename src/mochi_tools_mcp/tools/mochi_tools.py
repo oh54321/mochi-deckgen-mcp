@@ -46,14 +46,43 @@ def collect() -> list[dict[str, Any]]:
             return c
         return c.get_deck(deck_id)
 
-    def mochi_create_deck(name: str, parent_id: str | None = None) -> Any:
+    def mochi_create_deck(
+        name: str,
+        parent_id: str | None = None,
+        sort: int | None = None,
+        archived: bool | None = None,
+        sort_by: str | None = None,
+        cards_view: str | None = None,
+        show_sides: bool | None = None,
+        sort_by_direction: bool | None = None,
+        review_reverse: bool | None = None,
+    ) -> Any:
         c = _client_or_err()
         if isinstance(c, dict):
             return c
-        return c.create_deck(name, parent_id=parent_id)
+        return c.create_deck(
+            name,
+            parent_id=parent_id,
+            sort=sort,
+            archived=archived,
+            sort_by=sort_by,
+            cards_view=cards_view,
+            show_sides=show_sides,
+            sort_by_direction=sort_by_direction,
+            review_reverse=review_reverse,
+        )
 
     def mochi_update_deck(
-        deck_id: str, name: str | None = None, parent_id: str | None = None
+        deck_id: str,
+        name: str | None = None,
+        parent_id: str | None = None,
+        sort: int | None = None,
+        archived: bool | None = None,
+        sort_by: str | None = None,
+        cards_view: str | None = None,
+        show_sides: bool | None = None,
+        sort_by_direction: bool | None = None,
+        review_reverse: bool | None = None,
     ) -> Any:
         c = _client_or_err()
         if isinstance(c, dict):
@@ -63,6 +92,20 @@ def collect() -> list[dict[str, Any]]:
             fields["name"] = name
         if parent_id is not None:
             fields["parent-id"] = parent_id
+        if sort is not None:
+            fields["sort"] = sort
+        if archived is not None:
+            fields["archived?"] = archived
+        if sort_by is not None:
+            fields["sort-by"] = sort_by
+        if cards_view is not None:
+            fields["cards-view"] = cards_view
+        if show_sides is not None:
+            fields["show-sides?"] = show_sides
+        if sort_by_direction is not None:
+            fields["sort-by-direction"] = sort_by_direction
+        if review_reverse is not None:
+            fields["review-reverse?"] = review_reverse
         return c.update_deck(deck_id, **fields)
 
     def mochi_delete_deck(deck_id: str) -> Any:
@@ -94,12 +137,23 @@ def collect() -> list[dict[str, Any]]:
         content: str,
         template_id: str | None = None,
         fields: dict[str, Any] | None = None,
+        manual_tags: list[str] | None = None,
+        archived: bool | None = None,
+        review_reverse: bool | None = None,
+        pos: str | None = None,
     ) -> Any:
         c = _client_or_err()
         if isinstance(c, dict):
             return c
         return c.create_card(
-            deck_id=deck_id, content=content, template_id=template_id, fields=fields
+            deck_id=deck_id,
+            content=content,
+            template_id=template_id,
+            fields=fields,
+            manual_tags=manual_tags,
+            archived=archived,
+            review_reverse=review_reverse,
+            pos=pos,
         )
 
     def mochi_update_card(
@@ -107,6 +161,10 @@ def collect() -> list[dict[str, Any]]:
         content: str | None = None,
         deck_id: str | None = None,
         fields: dict[str, Any] | None = None,
+        manual_tags: list[str] | None = None,
+        archived: bool | None = None,
+        review_reverse: bool | None = None,
+        pos: str | None = None,
     ) -> Any:
         c = _client_or_err()
         if isinstance(c, dict):
@@ -118,6 +176,14 @@ def collect() -> list[dict[str, Any]]:
             body["deck-id"] = deck_id
         if fields is not None:
             body["fields"] = fields
+        if manual_tags is not None:
+            body["manual-tags"] = manual_tags
+        if archived is not None:
+            body["archived?"] = archived
+        if review_reverse is not None:
+            body["review-reverse?"] = review_reverse
+        if pos is not None:
+            body["pos"] = pos
         return c.update_card(card_id, **body)
 
     def mochi_delete_card(card_id: str) -> Any:
