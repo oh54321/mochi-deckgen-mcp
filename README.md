@@ -1,90 +1,109 @@
-# DeckGeneration
+# deckgen-mcp
 
-Generate Mochi / Anki flashcard decks from a topic description. Two run modes: a Python script using the Anthropic API, or a Claude Code skill.
-
-## What it does
-
-- Takes a topic ("Flags of Africa, 60 cards") and produces a folder of markdown cards.
-- Runs a clarify → plan → research → generate → verify pipeline with parallel agents.
-- Exports to `.mochi`, `.apkg` (Anki), markdown zip, and CSV.
-
-## Quickstart
-
-### Option A — API script
-
-```bash
-git clone https://github.com/oh54321/spaced-repetition-deck-generation.git && cd spaced-repetition-deck-generation
-pip install -e .
-cp .env.example .env       # paste your ANTHROPIC_API_KEY
-python scripts/generate.py
-```
-
-Or one-shot:
-
-```bash
-python scripts/generate.py \
-    --topic "Flags of Africa" --name FlagsAfrica \
-    --size 60 --format all --non-interactive
-```
-
-### Option B — Claude Code skill
-
-```bash
-git clone https://github.com/oh54321/spaced-repetition-deck-generation.git && cd spaced-repetition-deck-generation
-ln -s "$(pwd)/.claude/skills/deck-generation" ~/.claude/skills/deck-generation
-claude                     # opens Claude Code here
-> /deck-generation
-```
-
-The skill runs the same pipeline using Claude Code's built-in agent dispatch — no API key required.
+An MCP server for generating, modifying, and syncing [Mochi](https://app.mochi.cards) flashcard decks. Drop it into any MCP-capable client (Claude Code, Claude Desktop, Cursor, Goose, Zed) and you get 10 named workflows for deck management — all driven by the host's LLM, with no server-side API key beyond your Mochi key.
 
 ## What you get
 
-```
-decks/raw/<Name>/
-    card-001.md ... card-NNN.md   # one card per file, edit by hand if you like
-    images/                        # downloaded media
-    deck.json                      # metadata
-decks/exported/<Name>/
-    <Name>.mochi    # import into Mochi: File → Import
-    <Name>.apkg     # import into Anki: drag onto Anki Desktop
-    <Name>.zip      # markdown zip (Mochi also imports this)
-    <Name>.csv
+- Full Mochi CRUD parity with `itzcull/mochi-mcp`, plus everything that tool lacks.
+- Bidirectional local↔Mochi sync with content-hash incremental push.
+- 10 workflow prompts: `quickstart`, `generate-deck`, `extend-deck`, `modify-deck`, `review-deck`, `merge-decks`, `mirror-deck`, `delete-deck`, `browse-decks`, `make-cards-from-image`.
+- 8 reusable subagent prompts (planner, generator, verifier, modifier, compressor, clarifier, image-card-creator, image-searcher).
+- Atomic-card quality gate: every card is simple, atomic, binary. Non-negotiable.
+- Image-first design: Wikipedia Commons fetcher, image post-processing (resize/EXIF/dedup/SVG→PNG), user-supplied images, vision-aware verification.
+- All prompts are tight: subagent prompts ≤15 lines, workflow prompts ≤30 lines.
+
+## Install
+
+```bash
+pip install git+https://github.com/oh54321/spaced-repetition-deck-generation.git
+# Optional: enable SVG → PNG conversion (Wikipedia flag SVGs etc.)
+pip install 'deckgen-mcp[svg]'
 ```
 
-## CLI reference (API mode)
+You'll need a Mochi API key. Get one at https://app.mochi.cards/ → click your avatar → Account Settings → API Keys.
 
-| Flag | Default | Notes |
+## Wire up
+
+### Claude Code (recommended)
+
+```bash
+claude mcp add deckgen --env MOCHI_API_KEY=mochi_xxx -- deckgen-mcp
+ln -s "$(deckgen-mcp --agents-path)" ~/.claude/agents/deckgen
+```
+
+Line 2 enables parallel subagent dispatch. Skip it and workflows still run, just serially.
+
+### Claude Desktop / Cursor / Goose / Zed
+
+Add to your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "deckgen": {
+      "command": "deckgen-mcp",
+      "env": {"MOCHI_API_KEY": "mochi_xxx"}
+    }
+  }
+}
+```
+
+## Quickstart
+
+In your client, invoke the `quickstart` prompt. It checks your Mochi auth, lists your existing decks, and routes you to the right workflow.
+
+## Environment
+
+| Var | Required? | Default | Effect |
+|---|---|---|---|
+| `MOCHI_API_KEY` | for `mochi_*` and `sync_*` tools | – | HTTP Basic auth |
+| `DECKGEN_DECKS_ROOT` | optional | `~/.local/share/deckgen-mcp/decks/` | Override to `./decks` to hand-edit cards |
+| `DECKGEN_DEFAULT_REGEN` | optional | `1` | Max regen attempts on failed verification |
+| `DECKGEN_DEFAULT_CONCURRENCY` | optional | `10` | Hint to workflows for parallel batch size |
+
+## Performance
+
+| Client | 50-card generate | 50-card verify |
 |---|---|---|
-| `--topic STR` | (prompted) | Deck description |
-| `--name STR` | (prompted) | Folder/deck name |
-| `--size INT` | 50 | Number of cards |
-| `--format X` | `mochi` | Repeatable; `all` enables every format |
-| `--regen INT` | 1 | Max regen attempts per failed verification |
-| `--concurrency INT` | 10 | Parallel agents |
-| `--model NAME` | `claude-sonnet-4-6` | Anthropic model |
-| `--overwrite` | off | Replace existing raw folder |
-| `--append` | off | Add cards to existing raw folder |
-| `--non-interactive` | off | Skip prompts |
+| Claude Code (parallel `Agent` dispatch) | ~30–60s | ~30–60s |
+| Claude Desktop / Cursor / Goose / Zed (serial) | ~5–10min | ~5–10min |
 
-## Customizing prompts
+For decks > 20 cards, Claude Code is strongly preferred.
 
-Edit any file in `src/deckgen/prompts/`. Both run modes reload prompts on each run.
+## Card design principles
+
+Generated cards satisfy:
+
+- **Simple** — one concept per card.
+- **Atomic** — tests one fact, association, or relationship. Cannot be subdivided.
+- **Binary** — back is the unique correct response to the front. No "approximately."
+
+The front does *not* have to be a question. Valid fronts include images-to-identify, terms-to-define, cloze deletions, translation prompts, expressions to simplify, diagrams. What matters is the unique success condition.
+
+Reference: Andy Matuschak, *How to write good prompts*. SuperMemo, *20 rules of formulating knowledge*.
 
 ## Development
 
 ```bash
-pip install -e ".[dev]"
-pytest
-ruff check .
+pip install -e ".[dev,svg]"
+./scripts/verify.sh    # full quality gate (pytest, coverage, ruff, mypy, prompt audit, server smoke)
 ```
 
-## Troubleshooting
+### Manual integration test (before any release)
 
-- **`ANTHROPIC_API_KEY missing`** — copy `.env.example` to `.env` and paste your key from console.anthropic.com.
-- **Rate limit errors** — lower `--concurrency`. Default is 10.
-- **Image fetch failures** — logged as warnings, do not fail the run.
-- **Mochi import says invalid file** — try the `.zip` (markdown) export instead; Mochi accepts both.
+1. Set `MOCHI_API_KEY` to a key on a sandbox Mochi account.
+2. Run each workflow once:
+   - `quickstart` → confirm auth check passes
+   - `generate-deck` ("Flags of Africa", 5 cards)
+   - `extend-deck` (add 2 more)
+   - `modify-deck` (swap-sides preset)
+   - `review-deck` (auto mode, then manual)
+   - `merge-decks`
+   - `mirror-deck` on an existing Mochi deck with images
+   - `make-cards-from-image` (paste a textbook screenshot)
+   - `browse-decks` (with and without query)
+   - `delete-deck` (trash mode)
+3. Confirm cards appear in Mochi for each push step.
 
 ## License
 
