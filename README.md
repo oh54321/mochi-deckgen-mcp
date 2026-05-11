@@ -17,8 +17,15 @@ An MCP server for generating, modifying, and syncing [Mochi](https://app.mochi.c
 ```bash
 pip install git+https://github.com/oh54321/spaced-repetition-deck-generation.git
 # Optional: enable SVG → PNG conversion (Wikipedia flag SVGs etc.)
-pip install 'deckgen-mcp[svg]'
+pip install 'deckgen-mcp[svg] @ git+https://github.com/oh54321/spaced-repetition-deck-generation.git'
 ```
+
+The `[svg]` extra needs the system Cairo library installed:
+
+- macOS: `brew install cairo`
+- Debian / Ubuntu: `sudo apt install libcairo2`
+- Fedora: `sudo dnf install cairo`
+- Windows: install from https://www.cairographics.org/, or skip `[svg]` and Wikipedia SVGs will be stored as raw `.svg` files.
 
 You'll need a Mochi API key. Get one at https://app.mochi.cards/ → click your avatar → Account Settings → API Keys.
 
