@@ -1,4 +1,4 @@
-from deckgen_mcp.registry import all_tools, all_prompts, all_resources
+from deckgen_mcp.registry import all_prompts, all_resources, all_tools
 
 
 def test_all_tools_combine_local_mochi_sync():

@@ -1,4 +1,4 @@
-from pathlib import Path
+from __future__ import annotations
 
 from deckgen_mcp.sync.pull import pull_deck
 
@@ -8,14 +8,17 @@ class FakeMochi:
         return {"id": deck_id, "name": "Flags"}
 
     def list_cards(self, deck_id=None, bookmark=None):
-        return {"docs": [
-            {"id": "c1", "content": "What flag?\n\n---\n\nJapan\n\n![](@media/jp.png)"},
-            {"id": "c2", "content": "Capital of France?\n\n---\n\nParis"},
-        ], "bookmark": None}
+        return {
+            "docs": [
+                {"id": "c1", "content": "What flag?\n\n---\n\nJapan\n\n![](@media/jp.png)"},
+                {"id": "c2", "content": "Capital of France?\n\n---\n\nParis"},
+            ],
+            "bookmark": None,
+        }
 
 
 def test_pull_writes_cards_and_mapping(tmp_path):
-    out = pull_deck(tmp_path, "d1", FakeMochi())
+    pull_deck(tmp_path, "d1", FakeMochi())
     folder = tmp_path / "raw" / "Flags"
     assert (folder / "card-001.md").exists()
     assert (folder / "card-002.md").exists()

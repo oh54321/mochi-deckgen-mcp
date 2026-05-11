@@ -30,5 +30,5 @@ def test_workflow_prompts_under_cap():
 
 def test_agent_prompts_start_with_role_line():
     for f in AGENTS.glob("*.md"):
-        first = next((l for l in f.read_text().splitlines() if l.strip()), "")
+        first = next((line for line in f.read_text().splitlines() if line.strip()), "")
         assert first.startswith("Role:"), f"{f.name} must start with `Role:`"

@@ -1,4 +1,4 @@
-from pathlib import Path
+from __future__ import annotations
 
 from deckgen_mcp.local.deck_ops import create_deck, write_card
 from deckgen_mcp.sync.diff import sync_status
@@ -8,6 +8,7 @@ from deckgen_mcp.sync.mapping import Mapping, hash_text, save_mapping
 class FakeMochi:
     def __init__(self, cards):
         self._cards = cards
+
     def list_cards(self, deck_id=None, bookmark=None):
         return {"docs": self._cards, "bookmark": None}
 
@@ -22,7 +23,14 @@ def test_status_reports_categories(tmp_path):
     mapping.cards["card-002.md"] = {"id": "c2", "content_hash": hash_text("OLD")}
     save_mapping(tmp_path / "raw" / "T", mapping)
 
-    fm = FakeMochi([{"id": "c1", "content": "Q1\n\n---\n\nA1"}, {"id": "c2", "content": "Q2-NEW\n\n---\n\nA2"}, {"id": "c3", "content": "extra\n\n---\n\nx"}])
+    fm = FakeMochi(
+        [
+            {"id": "c1", "content": "Q1\n\n---\n\nA1"},
+            {"id": "c2", "content": "Q2-NEW\n\n---\n\nA2"},
+            {"id": "c3", "content": "extra\n\n---\n\nx"},
+        ]
+    )
     status = sync_status(tmp_path, "T", fm)
-    assert "card-002.md" in [s["name"] for s in status if s["status"] == "changed-locally"]
+    changed = [s["name"] for s in status if s["status"] == "changed-locally"]
+    assert "card-002.md" in changed
     assert any(s["status"] == "new-remotely" for s in status)

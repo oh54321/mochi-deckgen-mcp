@@ -5,9 +5,11 @@ from pathlib import Path
 
 
 def test_agents_path_flag():
-    out = subprocess.check_output(
-        [sys.executable, "-m", "deckgen_mcp.server", "--agents-path"]
-    ).decode().strip()
+    out = (
+        subprocess.check_output([sys.executable, "-m", "deckgen_mcp.server", "--agents-path"])
+        .decode()
+        .strip()
+    )
     p = Path(out)
     assert p.exists()
     assert p.is_dir()
@@ -15,6 +17,7 @@ def test_agents_path_flag():
 
 def test_server_registers_all_tools_and_prompts():
     from deckgen_mcp.server import build_server
+
     server = build_server()
 
     tool_names = _extract_tool_names(server)

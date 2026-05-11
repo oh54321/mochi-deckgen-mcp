@@ -7,11 +7,17 @@ def test_register_returns_tool_callables():
     tools = local_tools.collect()
     names = {t["name"] for t in tools}
     expected = {
-        "local_create_deck", "local_write_card", "local_read_card",
-        "local_list_decks", "local_list_cards",
-        "local_delete_card", "local_delete_deck",
-        "local_fetch_image", "local_fetch_wikipedia_image",
-        "local_import_image", "local_check_malformed",
+        "local_create_deck",
+        "local_write_card",
+        "local_read_card",
+        "local_list_decks",
+        "local_list_cards",
+        "local_delete_card",
+        "local_delete_deck",
+        "local_fetch_image",
+        "local_fetch_wikipedia_image",
+        "local_import_image",
+        "local_check_malformed",
     }
     assert expected <= names
 

@@ -1,6 +1,3 @@
-import httpx
-import pytest
-
 from deckgen_mcp.tools import mochi_tools
 
 
@@ -21,12 +18,23 @@ def test_full_coverage_of_endpoints(monkeypatch):
     tools = mochi_tools.collect()
     names = {t["name"] for t in tools}
     expected = {
-        "mochi_list_decks", "mochi_get_deck", "mochi_create_deck", "mochi_update_deck",
-        "mochi_delete_deck", "mochi_trash_deck",
-        "mochi_list_cards", "mochi_get_card", "mochi_create_card", "mochi_update_card",
-        "mochi_delete_card", "mochi_trash_card",
-        "mochi_add_attachment", "mochi_delete_attachment",
-        "mochi_list_templates", "mochi_get_template", "mochi_create_template",
+        "mochi_list_decks",
+        "mochi_get_deck",
+        "mochi_create_deck",
+        "mochi_update_deck",
+        "mochi_delete_deck",
+        "mochi_trash_deck",
+        "mochi_list_cards",
+        "mochi_get_card",
+        "mochi_create_card",
+        "mochi_update_card",
+        "mochi_delete_card",
+        "mochi_trash_card",
+        "mochi_add_attachment",
+        "mochi_delete_attachment",
+        "mochi_list_templates",
+        "mochi_get_template",
+        "mochi_create_template",
         "mochi_get_due_cards",
     }
     assert expected <= names

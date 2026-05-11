@@ -1,8 +1,4 @@
-import datetime as _dt
-from pathlib import Path
-
 from deckgen_mcp.local.deck_ops import create_deck, write_card
-from deckgen_mcp.sync.mapping import Mapping, save_mapping
 from deckgen_mcp.sync.push import push_deck
 
 

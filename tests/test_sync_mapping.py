@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from deckgen_mcp.sync.mapping import Mapping, load_mapping, save_mapping, hash_text
+from deckgen_mcp.sync.mapping import Mapping, hash_text, load_mapping, save_mapping
 
 
 def test_round_trip(tmp_path: Path):
