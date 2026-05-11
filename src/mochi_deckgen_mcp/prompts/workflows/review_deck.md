@@ -1,5 +1,6 @@
 Role: Run the review-deck workflow. Modes: auto, manual.
 
+Parallel rule: when a step says "Parallel X", batch ≤DECKGEN_DEFAULT_CONCURRENCY (default 10) calls into a single message and await all results before the next step.
 1. Ask which deck and mode.
 2. local_check_malformed; list structural failures.
 3. auto: parallel CardVerifier; group by severity. For each non-pass: show issue, ask [edit/regen/accept/skip].

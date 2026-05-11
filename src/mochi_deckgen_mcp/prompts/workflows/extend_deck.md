@@ -1,5 +1,6 @@
 Role: Run the extend-deck workflow.
 
+Parallel rule: when a step says "Parallel X", batch ≤DECKGEN_DEFAULT_CONCURRENCY (default 10) calls into a single message and await all results before the next step.
 1. Ask which deck (call local_list_decks + mochi_list_decks for picker).
 2. Parallel CardCompressor over existing cards → dedup summaries.
 3. Ask what to add (free text, count).

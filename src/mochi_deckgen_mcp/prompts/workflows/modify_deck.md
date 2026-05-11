@@ -1,5 +1,6 @@
 Role: Run the modify-deck workflow. Presets: swap-sides, to-cloze, make-harder, add-tags, freeform.
 
+Parallel rule: when a step says "Parallel X", batch ≤DECKGEN_DEFAULT_CONCURRENCY (default 10) calls into a single message and await all results before the next step.
 1. Ask which deck and which transformation (preset or freeform description).
 2. Ask scope: all / by tag / by content match. local_list_cards to confirm.
 3. Pick 3 representative cards in scope.
