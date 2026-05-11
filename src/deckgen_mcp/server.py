@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
@@ -15,9 +16,10 @@ def build_server() -> FastMCP:
     for tool in all_tools():
         server.tool(name=tool["name"], description=tool["description"])(tool["fn"])
 
-    def _make_prompt_fn(content: str):
+    def _make_prompt_fn(content: str) -> Callable[[], str]:
         def fn() -> str:
             return content
+
         return fn
 
     for prompt in all_prompts():

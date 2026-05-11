@@ -14,7 +14,7 @@ _PNG_SIG = b"\x89PNG"
 
 def _process(content: bytes, max_edge_px: int) -> tuple[bytes, str]:
     is_png = content[:4] == _PNG_SIG
-    img = Image.open(io.BytesIO(content))
+    img: Image.Image = Image.open(io.BytesIO(content))
     if img.mode in ("RGBA", "P"):
         img = img.convert("RGBA")
         is_png = True
@@ -23,7 +23,9 @@ def _process(content: bytes, max_edge_px: int) -> tuple[bytes, str]:
 
     if max(img.size) > max_edge_px:
         ratio = max_edge_px / max(img.size)
-        img = img.resize((int(img.size[0] * ratio), int(img.size[1] * ratio)), Image.LANCZOS)
+        img = img.resize(
+            (int(img.size[0] * ratio), int(img.size[1] * ratio)), Image.Resampling.LANCZOS
+        )
 
     fmt = "PNG" if is_png else "JPEG"
     buf = io.BytesIO()

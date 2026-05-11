@@ -4,6 +4,7 @@ import datetime as _dt
 import json
 import shutil
 from pathlib import Path
+from typing import Any
 
 from deckgen_mcp.local.deck_fs import read_card as _read_card_file
 
@@ -26,7 +27,9 @@ def _now() -> str:
     return _dt.datetime.now(_dt.UTC).isoformat().replace("+00:00", "Z")
 
 
-def create_deck(root: Path, name: str, description: str = "", parent_name: str | None = None) -> dict:
+def create_deck(
+    root: Path, name: str, description: str = "", parent_name: str | None = None
+) -> dict[str, Any]:
     folder = _raw(root) / name
     if folder.exists():
         raise FileExistsError(f"Deck {name} already exists at {folder}")
@@ -42,8 +45,13 @@ def create_deck(root: Path, name: str, description: str = "", parent_name: str |
 
 
 def write_card(
-    root: Path, deck: str, index: int, front_md: str, back_md: str,
-    tags: list[str] | None = None, image_filename: str | None = None,
+    root: Path,
+    deck: str,
+    index: int,
+    front_md: str,
+    back_md: str,
+    tags: list[str] | None = None,
+    image_filename: str | None = None,
 ) -> str:
     folder = _raw(root) / deck
     if not folder.exists():
@@ -60,7 +68,7 @@ def write_card(
     return str(p)
 
 
-def read_card(root: Path, deck: str, index: int) -> dict:
+def read_card(root: Path, deck: str, index: int) -> dict[str, Any]:
     p = _raw(root) / deck / CARD_PAT.format(i=index)
     c = _read_card_file(p)
     return {
@@ -72,7 +80,7 @@ def read_card(root: Path, deck: str, index: int) -> dict:
     }
 
 
-def list_decks(root: Path) -> list[dict]:
+def list_decks(root: Path) -> list[dict[str, Any]]:
     raw = _raw(root)
     if not raw.exists():
         return []
@@ -84,18 +92,20 @@ def list_decks(root: Path) -> list[dict]:
     return result
 
 
-def list_cards(root: Path, deck: str) -> list[dict]:
+def list_cards(root: Path, deck: str) -> list[dict[str, Any]]:
     folder = _raw(root) / deck
     cards = []
     for p in sorted(folder.glob("card-*.md")):
         index = int(p.stem.split("-")[1])
         c = _read_card_file(p)
         first_line = c.front_md.splitlines()[0] if c.front_md else ""
-        cards.append({
-            "index": index,
-            "front_first_line": first_line[:80],
-            "tags": c.tags,
-        })
+        cards.append(
+            {
+                "index": index,
+                "front_first_line": first_line[:80],
+                "tags": c.tags,
+            }
+        )
     return cards
 
 

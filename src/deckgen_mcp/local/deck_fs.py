@@ -4,6 +4,7 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 TAGS_RE = re.compile(r"^Tags:\s*((?:#\S+\s*)+)$", re.MULTILINE)
 IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
@@ -41,7 +42,7 @@ class Deck:
     name: str
     description: str
     cards: list[Card]
-    metadata: dict
+    metadata: dict[str, Any]
     folder: Path
 
 
@@ -49,9 +50,7 @@ def read_deck(folder: Path) -> Deck:
     folder = Path(folder)
     meta = json.loads((folder / "deck.json").read_text(encoding="utf-8"))
     cards = [
-        read_card(p)
-        for p in sorted(folder.glob("card-*.md"))
-        if not p.name.endswith(".broken")
+        read_card(p) for p in sorted(folder.glob("card-*.md")) if not p.name.endswith(".broken")
     ]
     return Deck(
         name=meta["name"],

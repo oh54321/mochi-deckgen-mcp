@@ -33,5 +33,5 @@ class Template(BaseModel):
 
 
 class ListResponse(BaseModel):
-    docs: list[dict]
+    docs: list[dict[str, Any]]
     bookmark: str | None = None

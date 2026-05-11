@@ -51,3 +51,7 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM"]
 python_version = "3.11"
 strict = true
 files = ["src/deckgen_mcp"]
+
+[[tool.mypy.overrides]]
+module = ["cairosvg", "PIL", "PIL.*"]
+ignore_missing_imports = true

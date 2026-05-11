@@ -6,7 +6,7 @@ from pathlib import Path
 SEPARATOR_RE = re.compile(r"(?m)^---\s*\n\s*\n")
 
 
-def check_card_text(text: str) -> dict:
+def check_card_text(text: str) -> dict[str, object]:
     problems: list[str] = []
     matches = list(SEPARATOR_RE.finditer(text))
     if not matches:
@@ -27,5 +27,5 @@ def check_card_text(text: str) -> dict:
     return {"valid": valid, "problems": problems}
 
 
-def check_card_file(path: Path) -> dict:
+def check_card_file(path: Path) -> dict[str, object]:
     return check_card_text(Path(path).read_text(encoding="utf-8"))

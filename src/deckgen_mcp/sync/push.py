@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as _dt
 from pathlib import Path
+from typing import Any
 
 from deckgen_mcp.local.deck_fs import read_deck
 from deckgen_mcp.sync.mapping import Mapping, hash_text, load_mapping, save_mapping
@@ -14,7 +15,9 @@ def _card_content(front_md: str, back_md: str, tags: list[str]) -> str:
     return body
 
 
-def push_deck(decks_root: Path, deck_name: str, mochi_client, parent_id: str | None = None) -> dict:
+def push_deck(
+    decks_root: Path, deck_name: str, mochi_client: Any, parent_id: str | None = None
+) -> dict[str, Any]:
     folder = Path(decks_root) / "raw" / deck_name
     deck = read_deck(folder)
     mapping = load_mapping(folder)

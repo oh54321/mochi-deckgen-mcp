@@ -4,6 +4,7 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -12,7 +13,7 @@ class Mapping:
     deck_name_on_mochi: str
     parent_id: str | None = None
     template_id: str | None = None
-    cards: dict[str, dict] = field(default_factory=dict)
+    cards: dict[str, dict[str, Any]] = field(default_factory=dict)
     images: dict[str, str] = field(default_factory=dict)
     last_push_at: str | None = None
 

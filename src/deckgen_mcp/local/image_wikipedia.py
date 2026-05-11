@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import httpx
 
@@ -13,7 +14,7 @@ _client = httpx.Client(timeout=15.0, follow_redirects=True)
 WIKI_API = "https://en.wikipedia.org/w/api.php"
 
 
-def fetch_wikipedia_image(query: str, dest_dir: Path) -> dict | None:
+def fetch_wikipedia_image(query: str, dest_dir: Path) -> dict[str, Any] | None:
     params = {
         "action": "query",
         "format": "json",
@@ -31,8 +32,8 @@ def fetch_wikipedia_image(query: str, dest_dir: Path) -> dict | None:
         log.warning("wikipedia query failed for %s: %s", query, e)
         return None
 
-    pages = r.json().get("query", {}).get("pages", {})
-    page = next(iter(pages.values()), {})
+    pages: dict[str, Any] = r.json().get("query", {}).get("pages", {})
+    page: dict[str, Any] = next(iter(pages.values()), {})
     if page.get("missing") == "" or "thumbnail" not in page:
         return None
 

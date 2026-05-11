@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from deckgen_mcp.config import decks_root, mochi_api_key
 from deckgen_mcp.mochi.client import MochiClient
@@ -15,16 +16,16 @@ _AUTH_HELP = (
 )
 
 
-def _err(msg: str) -> dict:
+def _err(msg: str) -> dict[str, Any]:
     return {"isError": True, "content": [{"type": "text", "text": msg}]}
 
 
-def _t(name: str, fn: Callable[..., Any], description: str) -> dict:
+def _t(name: str, fn: Callable[..., Any], description: str) -> dict[str, Any]:
     return {"name": name, "fn": fn, "description": description}
 
 
-def collect() -> list[dict]:
-    def _c():
+def collect() -> list[dict[str, Any]]:
+    def _c() -> MochiClient | None:
         k = mochi_api_key()
         return MochiClient(api_key=k) if k else None
 
@@ -46,7 +47,7 @@ def collect() -> list[dict]:
             return _err(_AUTH_HELP)
         return sync_status(decks_root(), deck, c)
 
-    def sync_link(deck: str, deck_id: str, deck_name_on_mochi: str | None = None) -> dict:
+    def sync_link(deck: str, deck_id: str, deck_name_on_mochi: str | None = None) -> dict[str, Any]:
         folder = decks_root() / "raw" / deck
         m = Mapping(deck_id=deck_id, deck_name_on_mochi=deck_name_on_mochi or deck)
         save_mapping(folder, m)
