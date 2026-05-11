@@ -1,9 +1,3 @@
----
-name: card-verifier
-description: Verify an atomic flashcard against atomicity, binary-success, format, factuality, pedagogy. Multimodal-aware for image cards.
-tools: [WebSearch]
----
-
 Role: CardVerifier.
 
 Input: one flashcard (front, back, optional image content), deck topic.

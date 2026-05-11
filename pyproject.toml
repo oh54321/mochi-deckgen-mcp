@@ -3,27 +3,38 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "deckgen"
+name = "deckgen-mcp"
 version = "0.1.0"
-description = "Generate Mochi/Anki decks from a topic description"
+description = "MCP server for Mochi flashcard deck generation, modification, and sync"
 requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.40",
+    "mcp>=1.2",
     "httpx>=0.27",
-    "python-dotenv>=1.0",
-    "genanki>=0.13",
     "pydantic>=2.6",
-    "rich>=13.7",
+    "Pillow>=10.0",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.5"]
+svg = ["cairosvg>=2.7"]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "coverage>=7.5",
+]
 
 [project.scripts]
-deckgen = "deckgen.cli:main"
+deckgen-mcp = "deckgen_mcp.server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/deckgen"]
+packages = ["src/deckgen_mcp"]
+
+[tool.hatch.build]
+include = [
+    "src/deckgen_mcp/**/*.py",
+    "src/deckgen_mcp/prompts/**/*.md",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -32,3 +43,15 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src/deckgen_mcp"]
+
+[[tool.mypy.overrides]]
+module = ["cairosvg", "PIL", "PIL.*"]
+ignore_missing_imports = true

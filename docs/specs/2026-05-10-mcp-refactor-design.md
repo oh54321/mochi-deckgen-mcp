@@ -1,7 +1,7 @@
 # DeckGen MCP Refactor — Design Spec
 
 **Date:** 2026-05-10
-**Status:** Approved through brainstorming; awaiting user review of spec doc before implementation planning
+**Status:** Implemented (verify.sh green on 2026-05-10)
 **Supersedes:** `docs/specs/2026-05-10-deckgeneration-design.md` (the previous local-pipeline-with-Anthropic-API design)
 
 ## 1. Purpose
