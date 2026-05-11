@@ -5,7 +5,7 @@ from typing import Any
 
 import httpx
 
-from deckgen_mcp.mochi.errors import (
+from mochi_tools_mcp.mochi.errors import (
     MochiAuthError,
     MochiError,
     MochiNotFoundError,

@@ -8,7 +8,7 @@ def decks_root() -> Path:
     env = os.environ.get("DECKGEN_DECKS_ROOT")
     if env:
         return Path(env).expanduser()
-    return Path.home() / ".local" / "share" / "deckgen-mcp" / "decks"
+    return Path.home() / ".local" / "share" / "mochi-tools-mcp" / "decks"
 
 
 def default_regen() -> int:

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from deckgen_mcp.local.deck_ops import (
+from mochi_tools_mcp.local.deck_ops import (
     create_deck,
     delete_card,
     delete_deck,

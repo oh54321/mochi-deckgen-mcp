@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from deckgen_mcp.local.deck_fs import read_card as _read_card_file
+from mochi_tools_mcp.local.deck_fs import read_card as _read_card_file
 
 CARD_PAT = "card-{i:03d}.md"
 

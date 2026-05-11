@@ -5,8 +5,8 @@ import datetime as _dt
 from collections.abc import Callable
 from typing import Any
 
-from deckgen_mcp.config import mochi_api_key
-from deckgen_mcp.mochi.client import MochiClient
+from mochi_tools_mcp.config import mochi_api_key
+from mochi_tools_mcp.mochi.client import MochiClient
 
 _AUTH_HELP = (
     "MOCHI_API_KEY missing. Get a key at https://app.mochi.cards/ → click your avatar → "

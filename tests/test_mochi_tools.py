@@ -1,4 +1,4 @@
-from deckgen_mcp.tools import mochi_tools
+from mochi_tools_mcp.tools import mochi_tools
 
 
 def test_collect_with_no_key_returns_error_stubs(monkeypatch):

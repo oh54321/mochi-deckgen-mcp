@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from deckgen_mcp.local.deck_ops import create_deck, write_card
-from deckgen_mcp.sync.diff import sync_status
-from deckgen_mcp.sync.mapping import Mapping, hash_text, save_mapping
+from mochi_tools_mcp.local.deck_ops import create_deck, write_card
+from mochi_tools_mcp.sync.diff import sync_status
+from mochi_tools_mcp.sync.mapping import Mapping, hash_text, save_mapping
 
 
 class FakeMochi:

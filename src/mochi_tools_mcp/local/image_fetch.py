@@ -30,7 +30,7 @@ def _svg_to_png(svg_bytes: bytes) -> bytes | None:
     except ImportError:
         log.warning(
             "cairosvg not installed; cannot convert SVG. "
-            "Install with 'pip install deckgen-mcp[svg]'."
+            "Install with 'pip install mochi-tools-mcp[svg]'."
         )
         return None
     return cairosvg.svg2png(bytestring=svg_bytes, output_width=MAX_EDGE_DEFAULT)  # type: ignore[no-any-return]

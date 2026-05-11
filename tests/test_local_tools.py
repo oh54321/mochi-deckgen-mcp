@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from deckgen_mcp.tools import local_tools
+from mochi_tools_mcp.tools import local_tools
 
 
 def test_register_returns_tool_callables():

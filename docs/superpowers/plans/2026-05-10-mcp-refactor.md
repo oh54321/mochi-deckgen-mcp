@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Refactor `spaced-repetition-deck-generation` into a Python MCP server (`deckgen-mcp`) that exposes Mochi/local primitives, subagent prompts (≤15 lines), and workflow prompts (≤30 lines) to any MCP-capable client. No server-side LLM. Image-first. Atomic-card-enforced.
+**Goal:** Refactor `mochi-tools-mcp` into a Python MCP server (`mochi-tools-mcp`) that exposes Mochi/local primitives, subagent prompts (≤15 lines), and workflow prompts (≤30 lines) to any MCP-capable client. No server-side LLM. Image-first. Atomic-card-enforced.
 
 **Architecture:** Three layers shipped by one MCP server. Layer 1 = pure-Python tools (filesystem, image processing, Mochi HTTP, sync). Layer 2 = subagent markdown prompts surfaced as MCP prompts + resources + `.claude/agents/` for parallel dispatch. Layer 3 = workflow markdown prompts the user invokes by name. Built alongside the old `deckgen` package; old package deleted at the end.
 
@@ -29,7 +29,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "deckgen-mcp"
+name = "mochi-tools-mcp"
 version = "0.1.0"
 description = "MCP server for Mochi flashcard deck generation, modification, and sync"
 requires-python = ">=3.11"
@@ -51,15 +51,15 @@ dev = [
 ]
 
 [project.scripts]
-deckgen-mcp = "deckgen_mcp.server:main"
+mochi-tools-mcp = "mochi_tools_mcp.server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/deckgen_mcp"]
+packages = ["src/mochi_tools_mcp"]
 
 [tool.hatch.build]
 include = [
-    "src/deckgen_mcp/**/*.py",
-    "src/deckgen_mcp/prompts/**/*.md",
+    "src/mochi_tools_mcp/**/*.py",
+    "src/mochi_tools_mcp/prompts/**/*.md",
 ]
 
 [tool.pytest.ini_options]
@@ -76,19 +76,19 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src/deckgen_mcp"]
+files = ["src/mochi_tools_mcp"]
 ```
 
 - [ ] **Step 2: Verify package metadata installs**
 
 Run: `pip install -e ".[dev,svg]"`
-Expected: installs without resolver errors; `deckgen-mcp` console script exists.
+Expected: installs without resolver errors; `mochi-tools-mcp` console script exists.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add pyproject.toml
-git commit -m "build: switch project to deckgen-mcp with mcp+Pillow deps"
+git commit -m "build: switch project to mochi-tools-mcp with mcp+Pillow deps"
 ```
 
 ---
@@ -96,33 +96,33 @@ git commit -m "build: switch project to deckgen-mcp with mcp+Pillow deps"
 ### Task 2: Scaffold the new package directory tree
 
 **Files:**
-- Create: `src/deckgen_mcp/__init__.py`
-- Create: `src/deckgen_mcp/local/__init__.py`
-- Create: `src/deckgen_mcp/mochi/__init__.py`
-- Create: `src/deckgen_mcp/sync/__init__.py`
-- Create: `src/deckgen_mcp/tools/__init__.py`
-- Create: `src/deckgen_mcp/prompts/agents/.gitkeep`
-- Create: `src/deckgen_mcp/prompts/workflows/.gitkeep`
+- Create: `src/mochi_tools_mcp/__init__.py`
+- Create: `src/mochi_tools_mcp/local/__init__.py`
+- Create: `src/mochi_tools_mcp/mochi/__init__.py`
+- Create: `src/mochi_tools_mcp/sync/__init__.py`
+- Create: `src/mochi_tools_mcp/tools/__init__.py`
+- Create: `src/mochi_tools_mcp/prompts/agents/.gitkeep`
+- Create: `src/mochi_tools_mcp/prompts/workflows/.gitkeep`
 - Create: `.claude/agents/.gitkeep`
 
 - [ ] **Step 1: Create the skeleton**
 
 ```bash
-mkdir -p src/deckgen_mcp/{local,mochi,sync,tools,prompts/agents,prompts/workflows}
+mkdir -p src/mochi_tools_mcp/{local,mochi,sync,tools,prompts/agents,prompts/workflows}
 mkdir -p .claude/agents
-touch src/deckgen_mcp/__init__.py
-touch src/deckgen_mcp/local/__init__.py
-touch src/deckgen_mcp/mochi/__init__.py
-touch src/deckgen_mcp/sync/__init__.py
-touch src/deckgen_mcp/tools/__init__.py
-touch src/deckgen_mcp/prompts/agents/.gitkeep
-touch src/deckgen_mcp/prompts/workflows/.gitkeep
+touch src/mochi_tools_mcp/__init__.py
+touch src/mochi_tools_mcp/local/__init__.py
+touch src/mochi_tools_mcp/mochi/__init__.py
+touch src/mochi_tools_mcp/sync/__init__.py
+touch src/mochi_tools_mcp/tools/__init__.py
+touch src/mochi_tools_mcp/prompts/agents/.gitkeep
+touch src/mochi_tools_mcp/prompts/workflows/.gitkeep
 touch .claude/agents/.gitkeep
 ```
 
 - [ ] **Step 2: Write version into the top-level package**
 
-`src/deckgen_mcp/__init__.py`:
+`src/mochi_tools_mcp/__init__.py`:
 
 ```python
 __version__ = "0.1.0"
@@ -131,8 +131,8 @@ __version__ = "0.1.0"
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/deckgen_mcp .claude/agents
-git commit -m "scaffold: empty deckgen_mcp package tree"
+git add src/mochi_tools_mcp .claude/agents
+git commit -m "scaffold: empty mochi_tools_mcp package tree"
 ```
 
 ---
@@ -140,16 +140,16 @@ git commit -m "scaffold: empty deckgen_mcp package tree"
 ### Task 3: Port `deck_fs.py` (unchanged) into the new package + its test
 
 **Files:**
-- Create: `src/deckgen_mcp/local/deck_fs.py`
+- Create: `src/mochi_tools_mcp/local/deck_fs.py`
 - Create: `tests/test_parse_card.py` (rewrite to import from new package — old file stays for now)
 - Create: `tests/fixtures_new/sample_deck/` (copy of existing fixture)
 
 - [ ] **Step 1: Copy `deck_fs.py` verbatim into new package**
 
-Copy `src/deckgen/io/deck_fs.py` → `src/deckgen_mcp/local/deck_fs.py`. No code changes.
+Copy `src/deckgen/io/deck_fs.py` → `src/mochi_tools_mcp/local/deck_fs.py`. No code changes.
 
 ```bash
-cp src/deckgen/io/deck_fs.py src/deckgen_mcp/local/deck_fs.py
+cp src/deckgen/io/deck_fs.py src/mochi_tools_mcp/local/deck_fs.py
 ```
 
 - [ ] **Step 2: Copy the fixture directory**
@@ -168,7 +168,7 @@ from pathlib import Path
 
 import pytest
 
-from deckgen_mcp.local.deck_fs import Card, read_card, read_deck
+from mochi_tools_mcp.local.deck_fs import Card, read_card, read_deck
 
 FIXTURE = Path(__file__).parent / "fixtures_new" / "sample_deck"
 
@@ -216,8 +216,8 @@ Expected: 5 tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/local/deck_fs.py tests/test_parse_card_new.py tests/fixtures_new
-git commit -m "port: deck_fs.py and sample_deck fixture into deckgen_mcp"
+git add src/mochi_tools_mcp/local/deck_fs.py tests/test_parse_card_new.py tests/fixtures_new
+git commit -m "port: deck_fs.py and sample_deck fixture into mochi_tools_mcp"
 ```
 
 ---
@@ -227,7 +227,7 @@ git commit -m "port: deck_fs.py and sample_deck fixture into deckgen_mcp"
 ### Task 4: Layer-1 `local/malformed_check.py` (pure regex)
 
 **Files:**
-- Create: `src/deckgen_mcp/local/malformed_check.py`
+- Create: `src/mochi_tools_mcp/local/malformed_check.py`
 - Create: `tests/test_malformed_check.py`
 
 - [ ] **Step 1: Write the failing tests**
@@ -237,7 +237,7 @@ git commit -m "port: deck_fs.py and sample_deck fixture into deckgen_mcp"
 ```python
 from pathlib import Path
 
-from deckgen_mcp.local.malformed_check import check_card_text
+from mochi_tools_mcp.local.malformed_check import check_card_text
 
 
 def test_well_formed_card():
@@ -278,7 +278,7 @@ def test_multiple_separators_is_warning_not_error():
 def test_check_file(tmp_path: Path):
     p = tmp_path / "card-001.md"
     p.write_text("Q\n\n---\n\nA\n")
-    from deckgen_mcp.local.malformed_check import check_card_file
+    from mochi_tools_mcp.local.malformed_check import check_card_file
 
     assert check_card_file(p)["valid"] is True
 ```
@@ -286,11 +286,11 @@ def test_check_file(tmp_path: Path):
 - [ ] **Step 2: Run the tests; confirm import fails**
 
 Run: `pytest tests/test_malformed_check.py -v`
-Expected: ModuleNotFoundError on `deckgen_mcp.local.malformed_check`.
+Expected: ModuleNotFoundError on `mochi_tools_mcp.local.malformed_check`.
 
 - [ ] **Step 3: Implement `malformed_check.py`**
 
-`src/deckgen_mcp/local/malformed_check.py`:
+`src/mochi_tools_mcp/local/malformed_check.py`:
 
 ```python
 from __future__ import annotations
@@ -334,7 +334,7 @@ Expected: 6 tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/local/malformed_check.py tests/test_malformed_check.py
+git add src/mochi_tools_mcp/local/malformed_check.py tests/test_malformed_check.py
 git commit -m "feat: local/malformed_check structural validator (Layer-1, pure regex)"
 ```
 
@@ -343,7 +343,7 @@ git commit -m "feat: local/malformed_check structural validator (Layer-1, pure r
 ### Task 5: Extend `local/image_fetch.py` — resize, EXIF strip, dedup, SVG→PNG
 
 **Files:**
-- Create: `src/deckgen_mcp/local/image_fetch.py`
+- Create: `src/mochi_tools_mcp/local/image_fetch.py`
 - Create: `tests/test_image_fetch.py`
 
 - [ ] **Step 1: Write the failing tests**
@@ -358,7 +358,7 @@ import httpx
 import pytest
 from PIL import Image
 
-from deckgen_mcp.local.image_fetch import fetch_image
+from mochi_tools_mcp.local.image_fetch import fetch_image
 
 
 def _png_bytes(size=(2000, 1500), color=(255, 0, 0)) -> bytes:
@@ -369,7 +369,7 @@ def _png_bytes(size=(2000, 1500), color=(255, 0, 0)) -> bytes:
 
 def test_fetch_resizes_to_max_edge(tmp_path, monkeypatch):
     transport = httpx.MockTransport(lambda r: httpx.Response(200, content=_png_bytes(), headers={"content-type": "image/png"}))
-    monkeypatch.setattr("deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport))
+    monkeypatch.setattr("mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport))
 
     out = fetch_image("https://x/y.png", tmp_path, max_edge_px=512)
     assert out is not None
@@ -380,7 +380,7 @@ def test_fetch_resizes_to_max_edge(tmp_path, monkeypatch):
 def test_fetch_dedups_by_content_hash(tmp_path, monkeypatch):
     content = _png_bytes()
     transport = httpx.MockTransport(lambda r: httpx.Response(200, content=content, headers={"content-type": "image/png"}))
-    monkeypatch.setattr("deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport))
+    monkeypatch.setattr("mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport))
 
     a = fetch_image("https://x/a.png", tmp_path)
     b = fetch_image("https://x/b.png", tmp_path)
@@ -389,7 +389,7 @@ def test_fetch_dedups_by_content_hash(tmp_path, monkeypatch):
 
 def test_fetch_returns_none_on_http_error(tmp_path, monkeypatch):
     transport = httpx.MockTransport(lambda r: httpx.Response(500))
-    monkeypatch.setattr("deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport))
+    monkeypatch.setattr("mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport))
 
     assert fetch_image("https://x/y.png", tmp_path) is None
 
@@ -398,7 +398,7 @@ def test_svg_conversion_when_cairosvg_present(tmp_path, monkeypatch):
     pytest.importorskip("cairosvg")
     svg = b'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="red"/></svg>'
     transport = httpx.MockTransport(lambda r: httpx.Response(200, content=svg, headers={"content-type": "image/svg+xml"}))
-    monkeypatch.setattr("deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport))
+    monkeypatch.setattr("mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport))
 
     out = fetch_image("https://x/y.svg", tmp_path)
     assert out is not None
@@ -413,7 +413,7 @@ Expected: ModuleNotFoundError.
 
 - [ ] **Step 3: Implement `image_fetch.py`**
 
-`src/deckgen_mcp/local/image_fetch.py`:
+`src/mochi_tools_mcp/local/image_fetch.py`:
 
 ```python
 from __future__ import annotations
@@ -446,7 +446,7 @@ def _svg_to_png(svg_bytes: bytes) -> bytes | None:
     try:
         import cairosvg
     except ImportError:
-        log.warning("cairosvg not installed; cannot convert SVG. Install with 'pip install deckgen-mcp[svg]'.")
+        log.warning("cairosvg not installed; cannot convert SVG. Install with 'pip install mochi-tools-mcp[svg]'.")
         return None
     return cairosvg.svg2png(bytestring=svg_bytes, output_width=MAX_EDGE_DEFAULT)
 
@@ -517,7 +517,7 @@ Expected: 4 tests pass (or 3 + 1 skip if cairosvg not installed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/local/image_fetch.py tests/test_image_fetch.py
+git add src/mochi_tools_mcp/local/image_fetch.py tests/test_image_fetch.py
 git commit -m "feat: image_fetch with resize, dedup, SVG→PNG, EXIF strip"
 ```
 
@@ -526,7 +526,7 @@ git commit -m "feat: image_fetch with resize, dedup, SVG→PNG, EXIF strip"
 ### Task 6: `local/image_wikipedia.py` — Wikipedia Commons fetcher
 
 **Files:**
-- Create: `src/deckgen_mcp/local/image_wikipedia.py`
+- Create: `src/mochi_tools_mcp/local/image_wikipedia.py`
 - Create: `tests/test_image_wikipedia.py`
 
 - [ ] **Step 1: Write the failing tests**
@@ -539,7 +539,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from deckgen_mcp.local.image_wikipedia import fetch_wikipedia_image
+from mochi_tools_mcp.local.image_wikipedia import fetch_wikipedia_image
 
 
 def _handler(request: httpx.Request) -> httpx.Response:
@@ -576,8 +576,8 @@ def _handler(request: httpx.Request) -> httpx.Response:
 
 def test_fetch_wikipedia_image_success(tmp_path, monkeypatch):
     transport = httpx.MockTransport(_handler)
-    monkeypatch.setattr("deckgen_mcp.local.image_wikipedia._client", httpx.Client(transport=transport))
-    monkeypatch.setattr("deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport))
+    monkeypatch.setattr("mochi_tools_mcp.local.image_wikipedia._client", httpx.Client(transport=transport))
+    monkeypatch.setattr("mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport))
 
     result = fetch_wikipedia_image("Japan", tmp_path)
     assert result is not None
@@ -588,7 +588,7 @@ def test_fetch_wikipedia_image_success(tmp_path, monkeypatch):
 
 def test_fetch_wikipedia_image_missing_returns_none(tmp_path, monkeypatch):
     transport = httpx.MockTransport(_handler)
-    monkeypatch.setattr("deckgen_mcp.local.image_wikipedia._client", httpx.Client(transport=transport))
+    monkeypatch.setattr("mochi_tools_mcp.local.image_wikipedia._client", httpx.Client(transport=transport))
 
     assert fetch_wikipedia_image("Nonexistent", tmp_path) is None
 ```
@@ -600,7 +600,7 @@ Expected: ModuleNotFoundError.
 
 - [ ] **Step 3: Implement `image_wikipedia.py`**
 
-`src/deckgen_mcp/local/image_wikipedia.py`:
+`src/mochi_tools_mcp/local/image_wikipedia.py`:
 
 ```python
 from __future__ import annotations
@@ -610,7 +610,7 @@ from pathlib import Path
 
 import httpx
 
-from deckgen_mcp.local.image_fetch import fetch_image
+from mochi_tools_mcp.local.image_fetch import fetch_image
 
 log = logging.getLogger(__name__)
 _client = httpx.Client(timeout=15.0, follow_redirects=True)
@@ -665,7 +665,7 @@ Expected: 2 tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/local/image_wikipedia.py tests/test_image_wikipedia.py
+git add src/mochi_tools_mcp/local/image_wikipedia.py tests/test_image_wikipedia.py
 git commit -m "feat: Wikipedia Commons image fetcher via MediaWiki API"
 ```
 
@@ -674,7 +674,7 @@ git commit -m "feat: Wikipedia Commons image fetcher via MediaWiki API"
 ### Task 7: `local/image_import.py` — user-supplied images
 
 **Files:**
-- Create: `src/deckgen_mcp/local/image_import.py`
+- Create: `src/mochi_tools_mcp/local/image_import.py`
 - Create: `tests/test_image_import.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -688,7 +688,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from deckgen_mcp.local.image_import import import_image
+from mochi_tools_mcp.local.image_import import import_image
 
 
 def _png(size=(50, 50)) -> bytes:
@@ -726,7 +726,7 @@ Run: `pytest tests/test_image_import.py -v`
 
 - [ ] **Step 3: Implement**
 
-`src/deckgen_mcp/local/image_import.py`:
+`src/mochi_tools_mcp/local/image_import.py`:
 
 ```python
 from __future__ import annotations
@@ -738,7 +738,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from deckgen_mcp.local.image_fetch import MAX_EDGE_DEFAULT
+from mochi_tools_mcp.local.image_fetch import MAX_EDGE_DEFAULT
 
 
 def _process(content: bytes, max_edge_px: int) -> tuple[bytes, str]:
@@ -786,7 +786,7 @@ Expected: 3 tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/local/image_import.py tests/test_image_import.py
+git add src/mochi_tools_mcp/local/image_import.py tests/test_image_import.py
 git commit -m "feat: user-supplied image import (file path or base64)"
 ```
 
@@ -795,7 +795,7 @@ git commit -m "feat: user-supplied image import (file path or base64)"
 ### Task 8: Local deck CRUD primitives — `local/deck_ops.py`
 
 **Files:**
-- Create: `src/deckgen_mcp/local/deck_ops.py`
+- Create: `src/mochi_tools_mcp/local/deck_ops.py`
 - Create: `tests/test_deck_ops.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -807,7 +807,7 @@ from pathlib import Path
 
 import pytest
 
-from deckgen_mcp.local.deck_ops import (
+from mochi_tools_mcp.local.deck_ops import (
     create_deck, write_card, read_card, list_decks, list_cards,
     delete_card, delete_deck,
 )
@@ -868,7 +868,7 @@ Run: `pytest tests/test_deck_ops.py -v`
 
 - [ ] **Step 3: Implement `deck_ops.py`**
 
-`src/deckgen_mcp/local/deck_ops.py`:
+`src/mochi_tools_mcp/local/deck_ops.py`:
 
 ```python
 from __future__ import annotations
@@ -878,7 +878,7 @@ import json
 import shutil
 from pathlib import Path
 
-from deckgen_mcp.local.deck_fs import read_card as _read_card_file
+from mochi_tools_mcp.local.deck_fs import read_card as _read_card_file
 
 CARD_PAT = "card-{i:03d}.md"
 
@@ -1002,7 +1002,7 @@ Expected: 6 tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/local/deck_ops.py tests/test_deck_ops.py
+git add src/mochi_tools_mcp/local/deck_ops.py tests/test_deck_ops.py
 git commit -m "feat: local deck CRUD with soft-delete to .trash/"
 ```
 
@@ -1011,13 +1011,13 @@ git commit -m "feat: local deck CRUD with soft-delete to .trash/"
 ### Task 9: Wrap local primitives as MCP tools — `tools/local_tools.py`
 
 **Files:**
-- Create: `src/deckgen_mcp/tools/local_tools.py`
-- Create: `src/deckgen_mcp/config.py`
+- Create: `src/mochi_tools_mcp/tools/local_tools.py`
+- Create: `src/mochi_tools_mcp/config.py`
 - Create: `tests/test_local_tools.py`
 
 - [ ] **Step 1: Implement `config.py`**
 
-`src/deckgen_mcp/config.py`:
+`src/mochi_tools_mcp/config.py`:
 
 ```python
 from __future__ import annotations
@@ -1030,7 +1030,7 @@ def decks_root() -> Path:
     env = os.environ.get("DECKGEN_DECKS_ROOT")
     if env:
         return Path(env).expanduser()
-    return Path.home() / ".local" / "share" / "deckgen-mcp" / "decks"
+    return Path.home() / ".local" / "share" / "mochi-tools-mcp" / "decks"
 
 
 def default_regen() -> int:
@@ -1052,7 +1052,7 @@ def mochi_api_key() -> str | None:
 ```python
 from pathlib import Path
 
-from deckgen_mcp.tools import local_tools
+from mochi_tools_mcp.tools import local_tools
 
 
 def test_register_returns_tool_callables():
@@ -1083,7 +1083,7 @@ Run: `pytest tests/test_local_tools.py -v`
 
 - [ ] **Step 4: Implement `tools/local_tools.py`**
 
-`src/deckgen_mcp/tools/local_tools.py`:
+`src/mochi_tools_mcp/tools/local_tools.py`:
 
 ```python
 from __future__ import annotations
@@ -1091,8 +1091,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Callable
 
-from deckgen_mcp.config import decks_root
-from deckgen_mcp.local import deck_ops, image_fetch, image_import, image_wikipedia, malformed_check
+from mochi_tools_mcp.config import decks_root
+from mochi_tools_mcp.local import deck_ops, image_fetch, image_import, image_wikipedia, malformed_check
 
 
 def _t(name: str, fn: Callable[..., Any], description: str) -> dict:
@@ -1181,7 +1181,7 @@ Expected: 2 tests pass.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/deckgen_mcp/config.py src/deckgen_mcp/tools/local_tools.py tests/test_local_tools.py
+git add src/mochi_tools_mcp/config.py src/mochi_tools_mcp/tools/local_tools.py tests/test_local_tools.py
 git commit -m "feat: tools/local_tools wraps local primitives for MCP"
 ```
 
@@ -1192,12 +1192,12 @@ git commit -m "feat: tools/local_tools wraps local primitives for MCP"
 ### Task 10: Mochi error types + pydantic schemas
 
 **Files:**
-- Create: `src/deckgen_mcp/mochi/errors.py`
-- Create: `src/deckgen_mcp/mochi/schemas.py`
+- Create: `src/mochi_tools_mcp/mochi/errors.py`
+- Create: `src/mochi_tools_mcp/mochi/schemas.py`
 
 - [ ] **Step 1: Write `errors.py`**
 
-`src/deckgen_mcp/mochi/errors.py`:
+`src/mochi_tools_mcp/mochi/errors.py`:
 
 ```python
 from __future__ import annotations
@@ -1225,7 +1225,7 @@ class MochiServerError(MochiError):
 
 - [ ] **Step 2: Write `schemas.py`**
 
-`src/deckgen_mcp/mochi/schemas.py`:
+`src/mochi_tools_mcp/mochi/schemas.py`:
 
 ```python
 from __future__ import annotations
@@ -1270,7 +1270,7 @@ class ListResponse(BaseModel):
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/deckgen_mcp/mochi/errors.py src/deckgen_mcp/mochi/schemas.py
+git add src/mochi_tools_mcp/mochi/errors.py src/mochi_tools_mcp/mochi/schemas.py
 git commit -m "feat: mochi error types and pydantic schemas"
 ```
 
@@ -1279,7 +1279,7 @@ git commit -m "feat: mochi error types and pydantic schemas"
 ### Task 11: Mochi HTTP client with retry — `mochi/client.py`
 
 **Files:**
-- Create: `src/deckgen_mcp/mochi/client.py`
+- Create: `src/mochi_tools_mcp/mochi/client.py`
 - Create: `tests/test_mochi_client.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -1290,8 +1290,8 @@ git commit -m "feat: mochi error types and pydantic schemas"
 import httpx
 import pytest
 
-from deckgen_mcp.mochi.client import MochiClient
-from deckgen_mcp.mochi.errors import MochiAuthError, MochiNotFoundError
+from mochi_tools_mcp.mochi.client import MochiClient
+from mochi_tools_mcp.mochi.errors import MochiAuthError, MochiNotFoundError
 
 
 def _client(handler):
@@ -1359,7 +1359,7 @@ Run: `pytest tests/test_mochi_client.py -v`
 
 - [ ] **Step 3: Implement `mochi/client.py`**
 
-`src/deckgen_mcp/mochi/client.py`:
+`src/mochi_tools_mcp/mochi/client.py`:
 
 ```python
 from __future__ import annotations
@@ -1369,7 +1369,7 @@ from typing import Any
 
 import httpx
 
-from deckgen_mcp.mochi.errors import (
+from mochi_tools_mcp.mochi.errors import (
     MochiAuthError, MochiError, MochiNotFoundError, MochiRateLimitError, MochiServerError,
 )
 
@@ -1496,7 +1496,7 @@ Expected: 5 tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/mochi/client.py tests/test_mochi_client.py
+git add src/mochi_tools_mcp/mochi/client.py tests/test_mochi_client.py
 git commit -m "feat: Mochi API client with auth, retry, full CRUD"
 ```
 
@@ -1505,7 +1505,7 @@ git commit -m "feat: Mochi API client with auth, retry, full CRUD"
 ### Task 12: `tools/mochi_tools.py` — wrap MochiClient as MCP tools
 
 **Files:**
-- Create: `src/deckgen_mcp/tools/mochi_tools.py`
+- Create: `src/mochi_tools_mcp/tools/mochi_tools.py`
 - Create: `tests/test_mochi_tools.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -1516,7 +1516,7 @@ git commit -m "feat: Mochi API client with auth, retry, full CRUD"
 import httpx
 import pytest
 
-from deckgen_mcp.tools import mochi_tools
+from mochi_tools_mcp.tools import mochi_tools
 
 
 def test_collect_with_no_key_returns_error_stubs(monkeypatch):
@@ -1553,7 +1553,7 @@ Run: `pytest tests/test_mochi_tools.py -v`
 
 - [ ] **Step 3: Implement `mochi_tools.py`**
 
-`src/deckgen_mcp/tools/mochi_tools.py`:
+`src/mochi_tools_mcp/tools/mochi_tools.py`:
 
 ```python
 from __future__ import annotations
@@ -1562,8 +1562,8 @@ import base64
 import datetime as _dt
 from typing import Any, Callable
 
-from deckgen_mcp.config import mochi_api_key
-from deckgen_mcp.mochi.client import MochiClient
+from mochi_tools_mcp.config import mochi_api_key
+from mochi_tools_mcp.mochi.client import MochiClient
 
 
 _AUTH_HELP = (
@@ -1647,7 +1647,7 @@ Expected: 2 tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/tools/mochi_tools.py tests/test_mochi_tools.py
+git add src/mochi_tools_mcp/tools/mochi_tools.py tests/test_mochi_tools.py
 git commit -m "feat: tools/mochi_tools wraps MochiClient (full itzcull parity)"
 ```
 
@@ -1658,7 +1658,7 @@ git commit -m "feat: tools/mochi_tools wraps MochiClient (full itzcull parity)"
 ### Task 13: `.mochi.json` mapping read/write — `sync/mapping.py`
 
 **Files:**
-- Create: `src/deckgen_mcp/sync/mapping.py`
+- Create: `src/mochi_tools_mcp/sync/mapping.py`
 - Create: `tests/test_sync_mapping.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -1668,7 +1668,7 @@ git commit -m "feat: tools/mochi_tools wraps MochiClient (full itzcull parity)"
 ```python
 from pathlib import Path
 
-from deckgen_mcp.sync.mapping import Mapping, load_mapping, save_mapping, hash_text
+from mochi_tools_mcp.sync.mapping import Mapping, load_mapping, save_mapping, hash_text
 
 
 def test_round_trip(tmp_path: Path):
@@ -1697,7 +1697,7 @@ def test_hash_text_stable():
 
 - [ ] **Step 3: Implement `sync/mapping.py`**
 
-`src/deckgen_mcp/sync/mapping.py`:
+`src/mochi_tools_mcp/sync/mapping.py`:
 
 ```python
 from __future__ import annotations
@@ -1747,7 +1747,7 @@ Expected: 3 pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/sync/mapping.py tests/test_sync_mapping.py
+git add src/mochi_tools_mcp/sync/mapping.py tests/test_sync_mapping.py
 git commit -m "feat: .mochi.json mapping read/write + content hashing"
 ```
 
@@ -1756,7 +1756,7 @@ git commit -m "feat: .mochi.json mapping read/write + content hashing"
 ### Task 14: `sync/push.py` — incremental local → Mochi
 
 **Files:**
-- Create: `src/deckgen_mcp/sync/push.py`
+- Create: `src/mochi_tools_mcp/sync/push.py`
 - Create: `tests/test_sync_push.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -1767,9 +1767,9 @@ git commit -m "feat: .mochi.json mapping read/write + content hashing"
 import datetime as _dt
 from pathlib import Path
 
-from deckgen_mcp.local.deck_ops import create_deck, write_card
-from deckgen_mcp.sync.mapping import Mapping, save_mapping
-from deckgen_mcp.sync.push import push_deck
+from mochi_tools_mcp.local.deck_ops import create_deck, write_card
+from mochi_tools_mcp.sync.mapping import Mapping, save_mapping
+from mochi_tools_mcp.sync.push import push_deck
 
 
 class FakeMochi:
@@ -1838,7 +1838,7 @@ def test_second_push_updates_changed(tmp_path):
 
 - [ ] **Step 3: Implement `sync/push.py`**
 
-`src/deckgen_mcp/sync/push.py`:
+`src/mochi_tools_mcp/sync/push.py`:
 
 ```python
 from __future__ import annotations
@@ -1846,8 +1846,8 @@ from __future__ import annotations
 import datetime as _dt
 from pathlib import Path
 
-from deckgen_mcp.local.deck_fs import read_deck
-from deckgen_mcp.sync.mapping import Mapping, hash_text, load_mapping, save_mapping
+from mochi_tools_mcp.local.deck_fs import read_deck
+from mochi_tools_mcp.sync.mapping import Mapping, hash_text, load_mapping, save_mapping
 
 
 def _card_content(front_md: str, back_md: str, tags: list[str]) -> str:
@@ -1894,7 +1894,7 @@ Expected: 3 pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/sync/push.py tests/test_sync_push.py
+git add src/mochi_tools_mcp/sync/push.py tests/test_sync_push.py
 git commit -m "feat: sync push with incremental content-hash diffing"
 ```
 
@@ -1903,7 +1903,7 @@ git commit -m "feat: sync push with incremental content-hash diffing"
 ### Task 15: `sync/pull.py` — Mochi → local mirror
 
 **Files:**
-- Create: `src/deckgen_mcp/sync/pull.py`
+- Create: `src/mochi_tools_mcp/sync/pull.py`
 - Create: `tests/test_sync_pull.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -1913,7 +1913,7 @@ git commit -m "feat: sync push with incremental content-hash diffing"
 ```python
 from pathlib import Path
 
-from deckgen_mcp.sync.pull import pull_deck
+from mochi_tools_mcp.sync.pull import pull_deck
 
 
 class FakeMochi:
@@ -1949,7 +1949,7 @@ def test_pull_rewrites_media_refs_and_warns(tmp_path):
 
 - [ ] **Step 3: Implement `sync/pull.py`**
 
-`src/deckgen_mcp/sync/pull.py`:
+`src/mochi_tools_mcp/sync/pull.py`:
 
 ```python
 from __future__ import annotations
@@ -1957,7 +1957,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from deckgen_mcp.sync.mapping import Mapping, hash_text, save_mapping
+from mochi_tools_mcp.sync.mapping import Mapping, hash_text, save_mapping
 
 MEDIA_RE = re.compile(r"@media/([^)\s]+)")
 
@@ -2005,7 +2005,7 @@ Expected: 2 pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/sync/pull.py tests/test_sync_pull.py
+git add src/mochi_tools_mcp/sync/pull.py tests/test_sync_pull.py
 git commit -m "feat: sync pull with @media→images rewrite + missing-attachments warning"
 ```
 
@@ -2014,8 +2014,8 @@ git commit -m "feat: sync pull with @media→images rewrite + missing-attachment
 ### Task 16: `sync/diff.py` (status) and `tools/sync_tools.py`
 
 **Files:**
-- Create: `src/deckgen_mcp/sync/diff.py`
-- Create: `src/deckgen_mcp/tools/sync_tools.py`
+- Create: `src/mochi_tools_mcp/sync/diff.py`
+- Create: `src/mochi_tools_mcp/tools/sync_tools.py`
 - Create: `tests/test_sync_diff.py`
 - Create: `tests/test_sync_tools.py`
 
@@ -2026,9 +2026,9 @@ git commit -m "feat: sync pull with @media→images rewrite + missing-attachment
 ```python
 from pathlib import Path
 
-from deckgen_mcp.local.deck_ops import create_deck, write_card
-from deckgen_mcp.sync.diff import sync_status
-from deckgen_mcp.sync.mapping import Mapping, hash_text, save_mapping
+from mochi_tools_mcp.local.deck_ops import create_deck, write_card
+from mochi_tools_mcp.sync.diff import sync_status
+from mochi_tools_mcp.sync.mapping import Mapping, hash_text, save_mapping
 
 
 class FakeMochi:
@@ -2056,16 +2056,16 @@ def test_status_reports_categories(tmp_path):
 
 - [ ] **Step 2: Implement `sync/diff.py`**
 
-`src/deckgen_mcp/sync/diff.py`:
+`src/mochi_tools_mcp/sync/diff.py`:
 
 ```python
 from __future__ import annotations
 
 from pathlib import Path
 
-from deckgen_mcp.local.deck_fs import read_deck
-from deckgen_mcp.sync.mapping import hash_text, load_mapping
-from deckgen_mcp.sync.push import _card_content
+from mochi_tools_mcp.local.deck_fs import read_deck
+from mochi_tools_mcp.sync.mapping import hash_text, load_mapping
+from mochi_tools_mcp.sync.push import _card_content
 
 
 def sync_status(decks_root: Path, deck_name: str, mochi_client) -> list[dict]:
@@ -2115,7 +2115,7 @@ Expected: pass.
 `tests/test_sync_tools.py`:
 
 ```python
-from deckgen_mcp.tools import sync_tools
+from mochi_tools_mcp.tools import sync_tools
 
 
 def test_collect_has_expected_tools():
@@ -2132,19 +2132,19 @@ def test_push_without_auth(monkeypatch):
 
 - [ ] **Step 5: Implement `tools/sync_tools.py`**
 
-`src/deckgen_mcp/tools/sync_tools.py`:
+`src/mochi_tools_mcp/tools/sync_tools.py`:
 
 ```python
 from __future__ import annotations
 
 from typing import Any, Callable
 
-from deckgen_mcp.config import decks_root, mochi_api_key
-from deckgen_mcp.mochi.client import MochiClient
-from deckgen_mcp.sync.diff import sync_status
-from deckgen_mcp.sync.mapping import Mapping, save_mapping
-from deckgen_mcp.sync.pull import pull_deck
-from deckgen_mcp.sync.push import push_deck
+from mochi_tools_mcp.config import decks_root, mochi_api_key
+from mochi_tools_mcp.mochi.client import MochiClient
+from mochi_tools_mcp.sync.diff import sync_status
+from mochi_tools_mcp.sync.mapping import Mapping, save_mapping
+from mochi_tools_mcp.sync.pull import pull_deck
+from mochi_tools_mcp.sync.push import push_deck
 
 _AUTH_HELP = (
     "MOCHI_API_KEY missing. Get a key at https://app.mochi.cards/ → click your avatar → "
@@ -2205,7 +2205,7 @@ Expected: pass.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/deckgen_mcp/sync/diff.py src/deckgen_mcp/tools/sync_tools.py tests/test_sync_diff.py tests/test_sync_tools.py
+git add src/mochi_tools_mcp/sync/diff.py src/mochi_tools_mcp/tools/sync_tools.py tests/test_sync_diff.py tests/test_sync_tools.py
 git commit -m "feat: sync_status diff and sync_tools wrappers"
 ```
 
@@ -2225,7 +2225,7 @@ git commit -m "feat: sync_status diff and sync_tools wrappers"
 ```python
 from pathlib import Path
 
-ROOT = Path(__file__).parent.parent / "src" / "deckgen_mcp" / "prompts"
+ROOT = Path(__file__).parent.parent / "src" / "mochi_tools_mcp" / "prompts"
 AGENTS = ROOT / "agents"
 WORKFLOWS = ROOT / "workflows"
 
@@ -2276,14 +2276,14 @@ git commit -m "test: prompt-compression line-cap audit (gates §4.1)"
 ### Task 18: Layer-2 subagent prompts (all 8)
 
 **Files:**
-- Create: `src/deckgen_mcp/prompts/agents/deck_clarifier.md`
-- Create: `src/deckgen_mcp/prompts/agents/deck_planner.md`
-- Create: `src/deckgen_mcp/prompts/agents/card_compressor.md`
-- Create: `src/deckgen_mcp/prompts/agents/web_card_generator.md`
-- Create: `src/deckgen_mcp/prompts/agents/image_card_creator.md`
-- Create: `src/deckgen_mcp/prompts/agents/image_searcher.md`
-- Create: `src/deckgen_mcp/prompts/agents/card_verifier.md`
-- Create: `src/deckgen_mcp/prompts/agents/card_modifier.md`
+- Create: `src/mochi_tools_mcp/prompts/agents/deck_clarifier.md`
+- Create: `src/mochi_tools_mcp/prompts/agents/deck_planner.md`
+- Create: `src/mochi_tools_mcp/prompts/agents/card_compressor.md`
+- Create: `src/mochi_tools_mcp/prompts/agents/web_card_generator.md`
+- Create: `src/mochi_tools_mcp/prompts/agents/image_card_creator.md`
+- Create: `src/mochi_tools_mcp/prompts/agents/image_searcher.md`
+- Create: `src/mochi_tools_mcp/prompts/agents/card_verifier.md`
+- Create: `src/mochi_tools_mcp/prompts/agents/card_modifier.md`
 
 - [ ] **Step 1: Write `deck_clarifier.md`**
 
@@ -2394,7 +2394,7 @@ Expected: agent test passes; workflow test still fails (no workflow files yet).
 - [ ] **Step 10: Commit**
 
 ```bash
-git add src/deckgen_mcp/prompts/agents
+git add src/mochi_tools_mcp/prompts/agents
 git commit -m "feat: Layer-2 subagent prompts (8 files, each ≤15 lines)"
 ```
 
@@ -2432,7 +2432,7 @@ Produce 2–4 follow-up questions that resolve ambiguity. Skip anything already 
 Output JSON: {"questions": [{"id": "snake_case", "question": string, "type": "free" | "choice", "options"?: [string]}]}.
 ```
 
-Repeat for the other 7. Use the same body as the corresponding file in `src/deckgen_mcp/prompts/agents/` and the matching frontmatter:
+Repeat for the other 7. Use the same body as the corresponding file in `src/mochi_tools_mcp/prompts/agents/` and the matching frontmatter:
 
 | File | name | tools |
 |---|---|---|
@@ -2456,16 +2456,16 @@ git commit -m "feat: .claude/agents wrappers for parallel dispatch in Claude Cod
 ### Task 20: Layer-3 workflow prompts (all 10)
 
 **Files:**
-- Create: `src/deckgen_mcp/prompts/workflows/quickstart.md`
-- Create: `src/deckgen_mcp/prompts/workflows/generate_deck.md`
-- Create: `src/deckgen_mcp/prompts/workflows/extend_deck.md`
-- Create: `src/deckgen_mcp/prompts/workflows/modify_deck.md`
-- Create: `src/deckgen_mcp/prompts/workflows/review_deck.md`
-- Create: `src/deckgen_mcp/prompts/workflows/merge_decks.md`
-- Create: `src/deckgen_mcp/prompts/workflows/mirror_deck.md`
-- Create: `src/deckgen_mcp/prompts/workflows/delete_deck.md`
-- Create: `src/deckgen_mcp/prompts/workflows/browse_decks.md`
-- Create: `src/deckgen_mcp/prompts/workflows/make_cards_from_image.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/quickstart.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/generate_deck.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/extend_deck.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/modify_deck.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/review_deck.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/merge_decks.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/mirror_deck.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/delete_deck.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/browse_decks.md`
+- Create: `src/mochi_tools_mcp/prompts/workflows/make_cards_from_image.md`
 
 - [ ] **Step 1: `quickstart.md`**
 
@@ -2616,7 +2616,7 @@ Expected: all 3 assertions pass.
 - [ ] **Step 12: Commit**
 
 ```bash
-git add src/deckgen_mcp/prompts/workflows
+git add src/mochi_tools_mcp/prompts/workflows
 git commit -m "feat: Layer-3 workflow prompts (10 files, each ≤30 lines)"
 ```
 
@@ -2627,7 +2627,7 @@ git commit -m "feat: Layer-3 workflow prompts (10 files, each ≤30 lines)"
 ### Task 21: Registry — collect tools and prompts
 
 **Files:**
-- Create: `src/deckgen_mcp/registry.py`
+- Create: `src/mochi_tools_mcp/registry.py`
 - Create: `tests/test_registry.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -2635,7 +2635,7 @@ git commit -m "feat: Layer-3 workflow prompts (10 files, each ≤30 lines)"
 `tests/test_registry.py`:
 
 ```python
-from deckgen_mcp.registry import all_tools, all_prompts, all_resources
+from mochi_tools_mcp.registry import all_tools, all_prompts, all_resources
 
 
 def test_all_tools_combine_local_mochi_sync():
@@ -2661,14 +2661,14 @@ def test_all_resources_include_subagent_files():
 
 - [ ] **Step 3: Implement `registry.py`**
 
-`src/deckgen_mcp/registry.py`:
+`src/mochi_tools_mcp/registry.py`:
 
 ```python
 from __future__ import annotations
 
 from pathlib import Path
 
-from deckgen_mcp.tools import local_tools, mochi_tools, sync_tools
+from mochi_tools_mcp.tools import local_tools, mochi_tools, sync_tools
 
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 AGENTS_DIR = PROMPTS_DIR / "agents"
@@ -2713,7 +2713,7 @@ Expected: 3 pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/registry.py tests/test_registry.py
+git add src/mochi_tools_mcp/registry.py tests/test_registry.py
 git commit -m "feat: registry combines tools + prompts + resources"
 ```
 
@@ -2722,7 +2722,7 @@ git commit -m "feat: registry combines tools + prompts + resources"
 ### Task 22: `server.py` entry point (FastMCP) + `--agents-path` flag
 
 **Files:**
-- Create: `src/deckgen_mcp/server.py`
+- Create: `src/mochi_tools_mcp/server.py`
 - Create: `tests/test_server_registration.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -2737,14 +2737,14 @@ from pathlib import Path
 
 
 def test_agents_path_flag():
-    out = subprocess.check_output([sys.executable, "-m", "deckgen_mcp.server", "--agents-path"]).decode().strip()
+    out = subprocess.check_output([sys.executable, "-m", "mochi_tools_mcp.server", "--agents-path"]).decode().strip()
     p = Path(out)
     assert p.exists()
     assert p.is_dir()
 
 
 def test_server_registers_all_tools_and_prompts():
-    from deckgen_mcp.server import build_server
+    from mochi_tools_mcp.server import build_server
     server = build_server()
     tool_names = {t.name for t in server._tool_manager.list_tools()}
     assert "local_create_deck" in tool_names
@@ -2760,7 +2760,7 @@ def test_server_registers_all_tools_and_prompts():
 
 - [ ] **Step 3: Implement `server.py`**
 
-`src/deckgen_mcp/server.py`:
+`src/mochi_tools_mcp/server.py`:
 
 ```python
 from __future__ import annotations
@@ -2771,7 +2771,7 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-from deckgen_mcp.registry import AGENTS_DIR, all_prompts, all_resources, all_tools
+from mochi_tools_mcp.registry import AGENTS_DIR, all_prompts, all_resources, all_tools
 
 
 def build_server() -> FastMCP:
@@ -2809,7 +2809,7 @@ def build_server() -> FastMCP:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="deckgen-mcp")
+    parser = argparse.ArgumentParser(prog="mochi-tools-mcp")
     parser.add_argument("--agents-path", action="store_true",
                         help="Print the path to the bundled .claude/agents/ directory and exit.")
     args = parser.parse_args()
@@ -2839,7 +2839,7 @@ Note: if FastMCP's manager attribute names differ in the installed version, adju
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/deckgen_mcp/server.py tests/test_server_registration.py
+git add src/mochi_tools_mcp/server.py tests/test_server_registration.py
 git commit -m "feat: FastMCP server entry + --agents-path flag"
 ```
 
@@ -2866,7 +2866,7 @@ pytest -q
 echo "==> coverage"
 coverage run -m pytest -q
 coverage report --fail-under=85 \
-    --include='src/deckgen_mcp/local/*,src/deckgen_mcp/mochi/*,src/deckgen_mcp/sync/*,src/deckgen_mcp/tools/*'
+    --include='src/mochi_tools_mcp/local/*,src/mochi_tools_mcp/mochi/*,src/mochi_tools_mcp/sync/*,src/mochi_tools_mcp/tools/*'
 
 echo "==> ruff check"
 ruff check .
@@ -2875,7 +2875,7 @@ echo "==> ruff format --check"
 ruff format --check .
 
 echo "==> mypy --strict"
-mypy src/deckgen_mcp
+mypy src/mochi_tools_mcp
 
 echo "==> prompt compression"
 pytest tests/test_prompt_compression.py -q
@@ -2907,7 +2907,7 @@ git commit -m "chore: scripts/verify.sh runs the full quality gate"
 `README.md`:
 
 ````markdown
-# deckgen-mcp
+# mochi-tools-mcp
 
 An MCP server for generating, modifying, and syncing [Mochi](https://app.mochi.cards) flashcard decks. Drop it into any MCP-capable client (Claude Code, Claude Desktop, Cursor, Goose, Zed) and you get 10 named workflows for deck management — all driven by the host's LLM, with no server-side API key beyond your Mochi key.
 
@@ -2924,9 +2924,9 @@ An MCP server for generating, modifying, and syncing [Mochi](https://app.mochi.c
 ## Install
 
 ```bash
-pip install git+https://github.com/oh54321/spaced-repetition-deck-generation.git
+pip install git+https://github.com/oh54321/mochi-tools-mcp.git
 # Optional: enable SVG → PNG conversion (Wikipedia flag SVGs etc.)
-pip install 'deckgen-mcp[svg]'
+pip install 'mochi-tools-mcp[svg]'
 ```
 
 You'll need a Mochi API key. Get one at https://app.mochi.cards/ → click your avatar → Account Settings → API Keys.
@@ -2936,8 +2936,8 @@ You'll need a Mochi API key. Get one at https://app.mochi.cards/ → click your 
 ### Claude Code (recommended)
 
 ```bash
-claude mcp add deckgen --env MOCHI_API_KEY=mochi_xxx -- deckgen-mcp
-ln -s "$(deckgen-mcp --agents-path)" ~/.claude/agents/deckgen
+claude mcp add deckgen --env MOCHI_API_KEY=mochi_xxx -- mochi-tools-mcp
+ln -s "$(mochi-tools-mcp --agents-path)" ~/.claude/agents/deckgen
 ```
 
 Line 2 enables parallel subagent dispatch. Skip it and workflows still run, just serially.
@@ -2950,7 +2950,7 @@ Add to your MCP config:
 {
   "mcpServers": {
     "deckgen": {
-      "command": "deckgen-mcp",
+      "command": "mochi-tools-mcp",
       "env": {"MOCHI_API_KEY": "mochi_xxx"}
     }
   }
@@ -2966,7 +2966,7 @@ In your client, invoke the `quickstart` prompt. It checks your Mochi auth, lists
 | Var | Required? | Default | Effect |
 |---|---|---|---|
 | `MOCHI_API_KEY` | for `mochi_*` and `sync_*` tools | – | HTTP Basic auth |
-| `DECKGEN_DECKS_ROOT` | optional | `~/.local/share/deckgen-mcp/decks/` | Override to `./decks` to hand-edit cards |
+| `DECKGEN_DECKS_ROOT` | optional | `~/.local/share/mochi-tools-mcp/decks/` | Override to `./decks` to hand-edit cards |
 | `DECKGEN_DEFAULT_REGEN` | optional | `1` | Max regen attempts on failed verification |
 | `DECKGEN_DEFAULT_CONCURRENCY` | optional | `10` | Hint to workflows for parallel batch size |
 
@@ -3147,7 +3147,7 @@ If any step fails: fix the root cause, re-run. Do not bypass. Common likely issu
 - [ ] **Step 3: Smoke test the server manually**
 
 ```bash
-deckgen-mcp --agents-path
+mochi-tools-mcp --agents-path
 ```
 
 Expected: prints an absolute path that exists and contains `.md` files.

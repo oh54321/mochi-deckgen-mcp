@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from deckgen_mcp.tools import local_tools, mochi_tools, sync_tools
+from mochi_tools_mcp.tools import local_tools, mochi_tools, sync_tools
 
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 AGENTS_DIR = PROMPTS_DIR / "agents"

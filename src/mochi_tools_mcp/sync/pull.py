@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from deckgen_mcp.sync.mapping import Mapping, hash_text, save_mapping
+from mochi_tools_mcp.sync.mapping import Mapping, hash_text, save_mapping
 
 MEDIA_RE = re.compile(r"@media/([^)\s]+)")
 

@@ -1,8 +1,8 @@
 import httpx
 import pytest
 
-from deckgen_mcp.mochi.client import MochiClient
-from deckgen_mcp.mochi.errors import MochiAuthError, MochiNotFoundError
+from mochi_tools_mcp.mochi.client import MochiClient
+from mochi_tools_mcp.mochi.errors import MochiAuthError, MochiNotFoundError
 
 
 def _client(handler):

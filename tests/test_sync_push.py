@@ -1,5 +1,5 @@
-from deckgen_mcp.local.deck_ops import create_deck, write_card
-from deckgen_mcp.sync.push import push_deck
+from mochi_tools_mcp.local.deck_ops import create_deck, write_card
+from mochi_tools_mcp.sync.push import push_deck
 
 
 class FakeMochi:

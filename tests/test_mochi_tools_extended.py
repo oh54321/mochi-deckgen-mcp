@@ -6,7 +6,7 @@ import base64
 
 import httpx
 
-from deckgen_mcp.tools import mochi_tools
+from mochi_tools_mcp.tools import mochi_tools
 
 
 def _mock_transport(handler):
@@ -15,7 +15,7 @@ def _mock_transport(handler):
 
 def _tools_with_key(monkeypatch, handler):
     monkeypatch.setenv("MOCHI_API_KEY", "testkey")
-    from deckgen_mcp.mochi.client import MochiClient
+    from mochi_tools_mcp.mochi.client import MochiClient
 
     original_init = MochiClient.__init__
 

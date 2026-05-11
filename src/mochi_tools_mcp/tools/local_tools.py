@@ -4,8 +4,14 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from deckgen_mcp.config import decks_root
-from deckgen_mcp.local import deck_ops, image_fetch, image_import, image_wikipedia, malformed_check
+from mochi_tools_mcp.config import decks_root
+from mochi_tools_mcp.local import (
+    deck_ops,
+    image_fetch,
+    image_import,
+    image_wikipedia,
+    malformed_check,
+)
 
 
 def _t(name: str, fn: Callable[..., Any], description: str) -> dict[str, Any]:

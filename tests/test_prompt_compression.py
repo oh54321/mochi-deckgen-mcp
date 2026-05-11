@@ -1,6 +1,6 @@
 from pathlib import Path
 
-ROOT = Path(__file__).parent.parent / "src" / "deckgen_mcp" / "prompts"
+ROOT = Path(__file__).parent.parent / "src" / "mochi_tools_mcp" / "prompts"
 AGENTS = ROOT / "agents"
 WORKFLOWS = ROOT / "workflows"
 

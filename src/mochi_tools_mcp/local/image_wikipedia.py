@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from deckgen_mcp.local.image_fetch import fetch_image
+from mochi_tools_mcp.local.image_fetch import fetch_image
 
 log = logging.getLogger(__name__)
 _client = httpx.Client(timeout=15.0, follow_redirects=True)

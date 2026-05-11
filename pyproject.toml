@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "deckgen-mcp"
+name = "mochi-tools-mcp"
 version = "0.1.0"
 description = "MCP server for Mochi flashcard deck generation, modification, and sync"
 requires-python = ">=3.11"
@@ -25,15 +25,15 @@ dev = [
 ]
 
 [project.scripts]
-deckgen-mcp = "deckgen_mcp.server:main"
+mochi-tools-mcp = "mochi_tools_mcp.server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/deckgen_mcp"]
+packages = ["src/mochi_tools_mcp"]
 
 [tool.hatch.build]
 include = [
-    "src/deckgen_mcp/**/*.py",
-    "src/deckgen_mcp/prompts/**/*.md",
+    "src/mochi_tools_mcp/**/*.py",
+    "src/mochi_tools_mcp/prompts/**/*.md",
 ]
 
 [tool.pytest.ini_options]
@@ -50,7 +50,7 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src/deckgen_mcp"]
+files = ["src/mochi_tools_mcp"]
 
 [[tool.mypy.overrides]]
 module = ["cairosvg", "PIL", "PIL.*"]

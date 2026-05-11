@@ -7,7 +7,7 @@ pytest -q
 echo "==> coverage"
 coverage run -m pytest -q
 coverage report --fail-under=85 \
-    --include='src/deckgen_mcp/local/*,src/deckgen_mcp/mochi/*,src/deckgen_mcp/sync/*,src/deckgen_mcp/tools/*'
+    --include='src/mochi_tools_mcp/local/*,src/mochi_tools_mcp/mochi/*,src/mochi_tools_mcp/sync/*,src/mochi_tools_mcp/tools/*'
 
 echo "==> ruff check"
 ruff check .
@@ -16,7 +16,7 @@ echo "==> ruff format --check"
 ruff format --check .
 
 echo "==> mypy --strict"
-mypy src/deckgen_mcp
+mypy src/mochi_tools_mcp
 
 echo "==> prompt compression"
 pytest tests/test_prompt_compression.py -q

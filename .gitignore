@@ -11,3 +11,9 @@ decks/raw/*
 decks/exported/*
 !decks/exported/.gitkeep
 .venv/
+
+# coverage artifacts
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/

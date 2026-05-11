@@ -3,9 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from deckgen_mcp.local.deck_fs import read_deck
-from deckgen_mcp.sync.mapping import hash_text, load_mapping
-from deckgen_mcp.sync.push import _card_content
+from mochi_tools_mcp.local.deck_fs import read_deck
+from mochi_tools_mcp.sync.mapping import hash_text, load_mapping
+from mochi_tools_mcp.sync.push import _card_content
 
 
 def sync_status(decks_root: Path, deck_name: str, mochi_client: Any) -> list[dict[str, Any]]:
