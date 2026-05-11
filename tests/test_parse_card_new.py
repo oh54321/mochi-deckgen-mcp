@@ -4,7 +4,7 @@ import pytest
 
 from deckgen_mcp.local.deck_fs import Card, read_card, read_deck
 
-FIXTURE = Path(__file__).parent / "fixtures_new" / "sample_deck"
+FIXTURE = Path(__file__).parent / "fixtures" / "sample_deck"
 
 
 def test_parses_front_back_tags_and_image():
