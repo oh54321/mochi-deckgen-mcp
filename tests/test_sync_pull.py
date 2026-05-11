@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from mochi_tools_mcp.sync.pull import pull_deck
+from mochi_deckgen_mcp.sync.pull import pull_deck
 
 
 class FakeMochi:

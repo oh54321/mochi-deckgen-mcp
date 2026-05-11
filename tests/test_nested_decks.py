@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from mochi_tools_mcp.local.deck_ops import (
+from mochi_deckgen_mcp.local.deck_ops import (
     create_deck,
     delete_deck,
     list_cards,
@@ -12,7 +12,7 @@ from mochi_tools_mcp.local.deck_ops import (
     read_card,
     write_card,
 )
-from mochi_tools_mcp.sync.push import push_deck
+from mochi_deckgen_mcp.sync.push import push_deck
 
 
 def test_create_nested_deck(tmp_path: Path):

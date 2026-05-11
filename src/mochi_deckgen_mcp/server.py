@@ -7,11 +7,11 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-from mochi_tools_mcp.registry import AGENTS_DIR, all_prompts, all_resources, all_tools
+from mochi_deckgen_mcp.registry import AGENTS_DIR, all_prompts, all_resources, all_tools
 
 
 def build_server() -> FastMCP:
-    server = FastMCP("mochi-tools")
+    server = FastMCP("mochi-deckgen")
 
     for tool in all_tools():
         server.tool(name=tool["name"], description=tool["description"])(tool["fn"])
@@ -40,7 +40,7 @@ def build_server() -> FastMCP:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="mochi-tools-mcp")
+    parser = argparse.ArgumentParser(prog="mochi-deckgen-mcp")
     parser.add_argument(
         "--agents-path",
         action="store_true",

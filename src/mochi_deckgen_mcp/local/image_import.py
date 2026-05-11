@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from mochi_tools_mcp.local.image_fetch import MAX_EDGE_DEFAULT
+from mochi_deckgen_mcp.local.image_fetch import MAX_EDGE_DEFAULT
 
 _PNG_SIG = b"\x89PNG"
 

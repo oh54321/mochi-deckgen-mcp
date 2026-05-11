@@ -4,8 +4,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from mochi_tools_mcp.sync.mapping import Mapping, save_mapping
-from mochi_tools_mcp.sync.push import _hash_basis
+from mochi_deckgen_mcp.sync.mapping import Mapping, save_mapping
+from mochi_deckgen_mcp.sync.push import _hash_basis
 
 MEDIA_RE = re.compile(r"@media/([^)\s]+)")
 SPLIT_RE = re.compile(r"(?m)^---\s*\n\s*\n")

@@ -6,7 +6,7 @@ from pathlib import Path
 import httpx
 from PIL import Image as _Image
 
-from mochi_tools_mcp.local.image_wikipedia import fetch_wikipedia_image
+from mochi_deckgen_mcp.local.image_wikipedia import fetch_wikipedia_image
 
 _JAPAN_THUMBNAIL = "https://upload.wikimedia.org/Flag_of_Japan.png"
 
@@ -49,10 +49,10 @@ def _handler(request: httpx.Request) -> httpx.Response:
 def test_fetch_wikipedia_image_success(tmp_path, monkeypatch):
     transport = httpx.MockTransport(_handler)
     monkeypatch.setattr(
-        "mochi_tools_mcp.local.image_wikipedia._client", httpx.Client(transport=transport)
+        "mochi_deckgen_mcp.local.image_wikipedia._client", httpx.Client(transport=transport)
     )
     monkeypatch.setattr(
-        "mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport)
+        "mochi_deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport)
     )
 
     result = fetch_wikipedia_image("Japan", tmp_path)
@@ -65,7 +65,7 @@ def test_fetch_wikipedia_image_success(tmp_path, monkeypatch):
 def test_fetch_wikipedia_image_missing_returns_none(tmp_path, monkeypatch):
     transport = httpx.MockTransport(_handler)
     monkeypatch.setattr(
-        "mochi_tools_mcp.local.image_wikipedia._client", httpx.Client(transport=transport)
+        "mochi_deckgen_mcp.local.image_wikipedia._client", httpx.Client(transport=transport)
     )
 
     assert fetch_wikipedia_image("Nonexistent", tmp_path) is None

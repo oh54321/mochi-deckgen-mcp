@@ -4,8 +4,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from mochi_tools_mcp.config import decks_root
-from mochi_tools_mcp.local import (
+from mochi_deckgen_mcp.config import decks_root
+from mochi_deckgen_mcp.local import (
     deck_ops,
     image_fetch,
     image_import,

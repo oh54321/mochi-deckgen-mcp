@@ -6,7 +6,7 @@ import httpx
 import pytest
 from PIL import Image
 
-from mochi_tools_mcp.local.image_fetch import fetch_image
+from mochi_deckgen_mcp.local.image_fetch import fetch_image
 
 
 def _png_bytes(size=(2000, 1500), color=(255, 0, 0)) -> bytes:
@@ -24,7 +24,7 @@ def _transport(content: bytes, content_type: str, status: int = 200):
 def test_fetch_resizes_to_max_edge(tmp_path, monkeypatch):
     transport = _transport(_png_bytes(), "image/png")
     monkeypatch.setattr(
-        "mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport)
+        "mochi_deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport)
     )
 
     out = fetch_image("https://x/y.png", tmp_path, max_edge_px=512)
@@ -37,7 +37,7 @@ def test_fetch_dedups_by_content_hash(tmp_path, monkeypatch):
     content = _png_bytes()
     transport = _transport(content, "image/png")
     monkeypatch.setattr(
-        "mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport)
+        "mochi_deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport)
     )
 
     a = fetch_image("https://x/a.png", tmp_path)
@@ -48,7 +48,7 @@ def test_fetch_dedups_by_content_hash(tmp_path, monkeypatch):
 def test_fetch_returns_none_on_http_error(tmp_path, monkeypatch):
     transport = httpx.MockTransport(lambda r: httpx.Response(500))
     monkeypatch.setattr(
-        "mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport)
+        "mochi_deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport)
     )
 
     assert fetch_image("https://x/y.png", tmp_path) is None
@@ -62,7 +62,7 @@ def test_svg_conversion_when_cairosvg_present(tmp_path, monkeypatch):
     )
     transport = _transport(svg, "image/svg+xml")
     monkeypatch.setattr(
-        "mochi_tools_mcp.local.image_fetch._client", httpx.Client(transport=transport)
+        "mochi_deckgen_mcp.local.image_fetch._client", httpx.Client(transport=transport)
     )
 
     out = fetch_image("https://x/y.svg", tmp_path)

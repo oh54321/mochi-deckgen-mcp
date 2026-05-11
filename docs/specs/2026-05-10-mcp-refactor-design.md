@@ -6,7 +6,7 @@
 
 ## 1. Purpose
 
-Refactor the existing `mochi-tools-mcp` project into a Model Context Protocol (MCP) server. The server is the single distribution unit: it ships filesystem primitives, Mochi API primitives, sync primitives, image-processing primitives, subagent prompts, and workflow prompts. Any MCP-capable client (Claude Code, Claude Desktop, Cursor, Goose, Zed) can install the server and immediately gain a full deck-management workflow.
+Refactor the existing `mochi-deckgen-mcp` project into a Model Context Protocol (MCP) server. The server is the single distribution unit: it ships filesystem primitives, Mochi API primitives, sync primitives, image-processing primitives, subagent prompts, and workflow prompts. Any MCP-capable client (Claude Code, Claude Desktop, Cursor, Goose, Zed) can install the server and immediately gain a full deck-management workflow.
 
 The server has **no LLM dependency**. All cognitive work (planning, generation, verification, modification, image-card creation, OCR) runs in the host's LLM, driven by the prompts the server registers. The only required environment variable is `MOCHI_API_KEY` (and that's only needed for the Mochi-API tools — local-only workflows run with no env at all).
 
@@ -34,7 +34,7 @@ The server has **no LLM dependency**. All cognitive work (planning, generation, 
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  mochi-tools-mcp  (Python MCP server, stdio transport)             │
+│  mochi-deckgen-mcp  (Python MCP server, stdio transport)             │
 │                                                                │
 │  Layer 1 — Primitive tools (zero LLM)                          │
 │  ┌────────────────────┐ ┌──────────────────────┐               │
@@ -163,18 +163,18 @@ Reference (linked in README): Andy Matuschak's *How to write good prompts*; Supe
 
 ### 4.3 Local files are a staging area, not the primary mental model
 
-Default `DECKGEN_DECKS_ROOT` is `~/.local/share/mochi-tools-mcp/decks/`, not `./decks/`. Casual users never see the filesystem; workflows phrase actions in terms of Mochi decks ("added 50 cards to *Flags* on Mochi"), not local folders. Power users override `DECKGEN_DECKS_ROOT=./decks` to hand-edit cards in their editor — that flow remains fully supported.
+Default `DECKGEN_DECKS_ROOT` is `~/.local/share/mochi-deckgen-mcp/decks/`, not `./decks/`. Casual users never see the filesystem; workflows phrase actions in terms of Mochi decks ("added 50 cards to *Flags* on Mochi"), not local folders. Power users override `DECKGEN_DECKS_ROOT=./decks` to hand-edit cards in their editor — that flow remains fully supported.
 
 ## 5. Repo layout (after refactor)
 
 ```
-mochi-tools-mcp/
+mochi-deckgen-mcp/
 ├── README.md
-├── pyproject.toml                       # console script: mochi-tools-mcp
+├── pyproject.toml                       # console script: mochi-deckgen-mcp
 ├── .gitignore
 ├── .env.example                         # MOCHI_API_KEY=
 │
-├── src/mochi_tools_mcp/
+├── src/mochi_deckgen_mcp/
 │   ├── __init__.py
 │   ├── server.py                        # MCP server entry point
 │   ├── config.py                        # env, decks_root resolution (XDG default)
@@ -223,7 +223,7 @@ mochi-tools-mcp/
 ├── .claude/
 │   └── agents/                          # Claude Code parallel subagent definitions
 │       ├── deck-clarifier.md            # (frontmatter wrappers pointing to the
-│       ├── deck-planner.md              #  matching file in src/mochi_tools_mcp/prompts/agents/)
+│       ├── deck-planner.md              #  matching file in src/mochi_deckgen_mcp/prompts/agents/)
 │       ├── card-compressor.md
 │       ├── web-card-generator.md
 │       ├── image-card-creator.md
@@ -348,7 +348,7 @@ Auth: HTTP Basic with `MOCHI_API_KEY` as username, empty password. Per-request r
 
 ## 7. Layer 2 — Subagent prompts
 
-Each lives at `src/mochi_tools_mcp/prompts/agents/<name>.md`. Each is also surfaced as an MCP prompt AND an MCP resource so users can `@mention` and read them in clients that support resources. Each has a matching `.claude/agents/<name>.md` frontmatter file pointing to the same content for Claude Code parallel dispatch.
+Each lives at `src/mochi_deckgen_mcp/prompts/agents/<name>.md`. Each is also surfaced as an MCP prompt AND an MCP resource so users can `@mention` and read them in clients that support resources. Each has a matching `.claude/agents/<name>.md` frontmatter file pointing to the same content for Claude Code parallel dispatch.
 
 **Each prompt is ≤ 15 lines and begins with `Role: <name>.`** See §4.1 for the structure and a worked example.
 
@@ -475,25 +475,25 @@ Requires a multimodal host LLM. User-supplied image (path, base64, or pasted int
 
 ## 9. Install + integration
 
-The server is distributed as a Python package with a console-script entry point `mochi-tools-mcp`.
+The server is distributed as a Python package with a console-script entry point `mochi-deckgen-mcp`.
 
 ### 9.1 Install
 
 ```bash
-pip install git+https://github.com/oh54321/mochi-tools-mcp.git
+pip install git+https://github.com/oh54321/mochi-deckgen-mcp.git
 # or with uv:
-uv tool install git+https://github.com/oh54321/mochi-tools-mcp.git
+uv tool install git+https://github.com/oh54321/mochi-deckgen-mcp.git
 # or from clone:
 git clone … && cd … && pip install -e .
 ```
 
-Optional extras: `pip install 'mochi-tools-mcp[svg]'` enables SVG → PNG conversion via `cairosvg` (for Wikipedia flag SVGs, etc.).
+Optional extras: `pip install 'mochi-deckgen-mcp[svg]'` enables SVG → PNG conversion via `cairosvg` (for Wikipedia flag SVGs, etc.).
 
 ### 9.2 Wire up — Claude Code (headline two-liner)
 
 ```bash
-claude mcp add deckgen --env MOCHI_API_KEY=mochi_xxx -- mochi-tools-mcp
-ln -s "$(mochi-tools-mcp --agents-path)" ~/.claude/agents/deckgen
+claude mcp add deckgen --env MOCHI_API_KEY=mochi_xxx -- mochi-deckgen-mcp
+ln -s "$(mochi-deckgen-mcp --agents-path)" ~/.claude/agents/deckgen
 ```
 
 Line 1 registers the server. Line 2 enables parallel subagent dispatch. Skip line 2 and workflows still run, just serially.
@@ -504,7 +504,7 @@ Line 1 registers the server. Line 2 enables parallel subagent dispatch. Skip lin
 {
   "mcpServers": {
     "deckgen": {
-      "command": "mochi-tools-mcp",
+      "command": "mochi-deckgen-mcp",
       "env": {"MOCHI_API_KEY": "mochi_xxx"}
     }
   }
@@ -516,7 +516,7 @@ Line 1 registers the server. Line 2 enables parallel subagent dispatch. Skip lin
 | Var | Required? | Default | Effect |
 |---|---|---|---|
 | `MOCHI_API_KEY` | For `mochi_*` and `sync_*` tools | – | HTTP Basic auth username |
-| `DECKGEN_DECKS_ROOT` | Optional | `~/.local/share/mochi-tools-mcp/decks/` | Where local decks live. Override to `./decks` for hand-editing |
+| `DECKGEN_DECKS_ROOT` | Optional | `~/.local/share/mochi-deckgen-mcp/decks/` | Where local decks live. Override to `./decks` for hand-editing |
 | `DECKGEN_DEFAULT_REGEN` | Optional | `1` | Max regen attempts in workflows |
 | `DECKGEN_DEFAULT_CONCURRENCY` | Optional | `10` | Hint to workflows for parallel dispatch batch size |
 
@@ -529,7 +529,7 @@ Boundaries only:
 - Mochi 401 → flag as auth error, do not retry; same URL hint as above.
 - Mochi 404 on a known mapped card ID → mark stale in `.mochi.json` and surface to user; next push will treat as new.
 - Image fetch failure during `local_fetch_image` → warn, return null, workflow continues.
-- SVG conversion failure (cairosvg not installed) → warn, save the raw SVG, suggest `pip install 'mochi-tools-mcp[svg]'`.
+- SVG conversion failure (cairosvg not installed) → warn, save the raw SVG, suggest `pip install 'mochi-deckgen-mcp[svg]'`.
 - Local file conflicts (existing `<decks_root>/raw/<Name>/` on `generate-deck`) → refuse; suggest `extend-deck` or different name. No `--overwrite` flag; users delete the folder themselves.
 - `CANNOT_ATOMIZE` from generators → surface to user with the reason. Never silently dropped.
 
@@ -545,7 +545,7 @@ Boundaries only:
 - `test_sync_push.py` — fake Mochi client; verify incremental push skips unchanged hashes, creates new cards, updates changed cards.
 - `test_sync_pull.py` — fake Mochi client returning canned cards; verify markdown files written with correct image-ref rewriting and `attachments-not-downloaded.txt`.
 - `test_server_registration.py` — start the MCP server in-process, query `tools/list` and `prompts/list`, assert every Layer-1 tool and Layer-3 workflow prompt is registered with a valid schema.
-- `test_prompt_compression.py` — NEW. Asserts every file in `src/mochi_tools_mcp/prompts/agents/` has ≤15 non-blank lines and every file in `src/mochi_tools_mcp/prompts/workflows/` has ≤30 non-blank lines. Fails the build if a prompt grows past the cap.
+- `test_prompt_compression.py` — NEW. Asserts every file in `src/mochi_deckgen_mcp/prompts/agents/` has ≤15 non-blank lines and every file in `src/mochi_deckgen_mcp/prompts/workflows/` has ≤30 non-blank lines. Fails the build if a prompt grows past the cap.
 
 No live LLM tests; subagent prompts are static markdown. The README documents how to manually exercise each workflow against a real Mochi account (§16 manual integration test).
 
@@ -599,10 +599,10 @@ Recommend Claude Code in the README for any deck > 20 cards. The non-parallel ex
 The refactor is **not complete** until all of the following pass and are recorded as the final task in the implementation plan:
 
 - `pytest` — all tests pass.
-- Code coverage on `src/mochi_tools_mcp/local/`, `mochi/`, `sync/`, `tools/` ≥ 90%.
+- Code coverage on `src/mochi_deckgen_mcp/local/`, `mochi/`, `sync/`, `tools/` ≥ 90%.
 - `ruff check .` — zero warnings.
 - `ruff format --check .` — formatted.
-- `mypy src/mochi_tools_mcp/` — clean under strict mode (`--strict`).
+- `mypy src/mochi_deckgen_mcp/` — clean under strict mode (`--strict`).
 - `test_prompt_compression.py` — every prompt within its line cap (§4.1).
 - `test_server_registration.py` — every Layer-1 tool and Layer-3 workflow prompt is registered with a valid input schema.
 - **Manual integration test** (documented checklist in README): one full run of each workflow against a sandbox Mochi account, with screenshots of (a) generated cards in Mochi, (b) `mirror-deck` round-trip, (c) `modify-deck` swap-sides preset.

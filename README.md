@@ -1,4 +1,4 @@
-# mochi-tools-mcp
+# mochi-deckgen-mcp
 
 An MCP server for generating, modifying, and syncing [Mochi](https://app.mochi.cards) flashcard decks. Drop it into any MCP-capable client (Claude Code, Claude Desktop, Cursor, Goose, Zed) and you get 10 named workflows for deck management — all driven by the host's LLM, with no server-side API key beyond your Mochi key.
 
@@ -15,9 +15,9 @@ An MCP server for generating, modifying, and syncing [Mochi](https://app.mochi.c
 ## Install
 
 ```bash
-pip install git+https://github.com/oh54321/mochi-tools-mcp.git
+pip install git+https://github.com/oh54321/mochi-deckgen-mcp.git
 # Optional: enable SVG → PNG conversion (Wikipedia flag SVGs etc.)
-pip install 'mochi-tools-mcp[svg] @ git+https://github.com/oh54321/mochi-tools-mcp.git'
+pip install 'mochi-deckgen-mcp[svg] @ git+https://github.com/oh54321/mochi-deckgen-mcp.git'
 ```
 
 The `[svg]` extra needs the system Cairo library installed:
@@ -34,8 +34,8 @@ You'll need a Mochi API key. Get one at https://app.mochi.cards/ → click your 
 ### Claude Code (recommended)
 
 ```bash
-claude mcp add deckgen --env MOCHI_API_KEY=mochi_xxx -- mochi-tools-mcp
-ln -s "$(mochi-tools-mcp --agents-path)" ~/.claude/agents/deckgen
+claude mcp add deckgen --env MOCHI_API_KEY=mochi_xxx -- mochi-deckgen-mcp
+ln -s "$(mochi-deckgen-mcp --agents-path)" ~/.claude/agents/deckgen
 ```
 
 Line 2 enables parallel subagent dispatch. Skip it and workflows still run, just serially.
@@ -48,7 +48,7 @@ Add to your MCP config:
 {
   "mcpServers": {
     "deckgen": {
-      "command": "mochi-tools-mcp",
+      "command": "mochi-deckgen-mcp",
       "env": {"MOCHI_API_KEY": "mochi_xxx"}
     }
   }
@@ -64,7 +64,7 @@ In your client, invoke the `quickstart` prompt. It checks your Mochi auth, lists
 | Var | Required? | Default | Effect |
 |---|---|---|---|
 | `MOCHI_API_KEY` | for `mochi_*` and `sync_*` tools | – | HTTP Basic auth |
-| `DECKGEN_DECKS_ROOT` | optional | `~/.local/share/mochi-tools-mcp/decks/` | Override to `./decks` to hand-edit cards |
+| `DECKGEN_DECKS_ROOT` | optional | `~/.local/share/mochi-deckgen-mcp/decks/` | Override to `./decks` to hand-edit cards |
 | `DECKGEN_DEFAULT_REGEN` | optional | `1` | Max regen attempts on failed verification |
 | `DECKGEN_DEFAULT_CONCURRENCY` | optional | `10` | Hint to workflows for parallel batch size |
 

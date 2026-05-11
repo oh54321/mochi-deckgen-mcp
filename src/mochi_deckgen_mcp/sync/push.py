@@ -4,8 +4,8 @@ import datetime as _dt
 from pathlib import Path
 from typing import Any
 
-from mochi_tools_mcp.local.deck_fs import read_deck
-from mochi_tools_mcp.sync.mapping import Mapping, hash_text, load_mapping, save_mapping
+from mochi_deckgen_mcp.local.deck_fs import read_deck
+from mochi_deckgen_mcp.sync.mapping import Mapping, hash_text, load_mapping, save_mapping
 
 
 def _card_content_for_mochi(front_md: str, back_md: str) -> str:

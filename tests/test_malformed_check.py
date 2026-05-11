@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from mochi_tools_mcp.local.malformed_check import check_card_text
+from mochi_deckgen_mcp.local.malformed_check import check_card_text
 
 
 def test_well_formed_card():
@@ -41,6 +41,6 @@ def test_multiple_separators_is_warning_not_error():
 def test_check_file(tmp_path: Path):
     p = tmp_path / "card-001.md"
     p.write_text("Q\n\n---\n\nA\n")
-    from mochi_tools_mcp.local.malformed_check import check_card_file
+    from mochi_deckgen_mcp.local.malformed_check import check_card_file
 
     assert check_card_file(p)["valid"] is True

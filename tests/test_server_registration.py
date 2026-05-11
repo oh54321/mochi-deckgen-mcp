@@ -6,7 +6,7 @@ from pathlib import Path
 
 def test_agents_path_flag():
     out = (
-        subprocess.check_output([sys.executable, "-m", "mochi_tools_mcp.server", "--agents-path"])
+        subprocess.check_output([sys.executable, "-m", "mochi_deckgen_mcp.server", "--agents-path"])
         .decode()
         .strip()
     )
@@ -16,7 +16,7 @@ def test_agents_path_flag():
 
 
 def test_server_registers_all_tools_and_prompts():
-    from mochi_tools_mcp.server import build_server
+    from mochi_deckgen_mcp.server import build_server
 
     server = build_server()
 

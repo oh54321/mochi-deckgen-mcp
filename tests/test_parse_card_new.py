@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from mochi_tools_mcp.local.deck_fs import read_card, read_deck
+from mochi_deckgen_mcp.local.deck_fs import read_card, read_deck
 
 FIXTURE = Path(__file__).parent / "fixtures" / "sample_deck"
 

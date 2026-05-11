@@ -1,4 +1,4 @@
-from mochi_tools_mcp.tools import sync_tools
+from mochi_deckgen_mcp.tools import sync_tools
 
 
 def test_collect_has_expected_tools():

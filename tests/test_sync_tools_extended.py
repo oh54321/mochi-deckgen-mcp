@@ -6,7 +6,7 @@ from pathlib import Path
 
 import httpx
 
-from mochi_tools_mcp.tools import sync_tools
+from mochi_deckgen_mcp.tools import sync_tools
 
 
 def _mock_transport(handler):
@@ -17,7 +17,7 @@ def _tools_with_key(tmp_path: Path, monkeypatch, handler=None):
     monkeypatch.setenv("DECKGEN_DECKS_ROOT", str(tmp_path))
     monkeypatch.setenv("MOCHI_API_KEY", "testkey")
     if handler is not None:
-        from mochi_tools_mcp.mochi.client import MochiClient
+        from mochi_deckgen_mcp.mochi.client import MochiClient
 
         original_init = MochiClient.__init__
 

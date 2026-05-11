@@ -1,4 +1,4 @@
-from mochi_tools_mcp.registry import all_prompts, all_resources, all_tools
+from mochi_deckgen_mcp.registry import all_prompts, all_resources, all_tools
 
 
 def test_all_tools_combine_local_mochi_sync():

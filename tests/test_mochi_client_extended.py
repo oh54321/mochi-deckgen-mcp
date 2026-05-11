@@ -5,8 +5,8 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from mochi_tools_mcp.mochi.client import MochiClient
-from mochi_tools_mcp.mochi.errors import (
+from mochi_deckgen_mcp.mochi.client import MochiClient
+from mochi_deckgen_mcp.mochi.errors import (
     MochiError,
     MochiRateLimitError,
     MochiServerError,

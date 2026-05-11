@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from mochi_tools_mcp.local.image_import import import_image
+from mochi_deckgen_mcp.local.image_import import import_image
 
 
 def _png(size=(50, 50)) -> bytes:

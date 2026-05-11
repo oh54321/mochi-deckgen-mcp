@@ -4,12 +4,12 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from mochi_tools_mcp.config import decks_root, mochi_api_key
-from mochi_tools_mcp.mochi.client import MochiClient
-from mochi_tools_mcp.sync.diff import sync_status
-from mochi_tools_mcp.sync.mapping import Mapping, save_mapping
-from mochi_tools_mcp.sync.pull import pull_deck
-from mochi_tools_mcp.sync.push import push_deck
+from mochi_deckgen_mcp.config import decks_root, mochi_api_key
+from mochi_deckgen_mcp.mochi.client import MochiClient
+from mochi_deckgen_mcp.sync.diff import sync_status
+from mochi_deckgen_mcp.sync.mapping import Mapping, save_mapping
+from mochi_deckgen_mcp.sync.pull import pull_deck
+from mochi_deckgen_mcp.sync.push import push_deck
 
 _AUTH_HELP = (
     "MOCHI_API_KEY missing. Get a key at https://app.mochi.cards/ → click your avatar → "

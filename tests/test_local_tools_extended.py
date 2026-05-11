@@ -7,7 +7,7 @@ from pathlib import Path
 
 import httpx
 
-from mochi_tools_mcp.tools import local_tools
+from mochi_deckgen_mcp.tools import local_tools
 
 
 def _tools(tmp_path: Path, monkeypatch) -> dict:
@@ -40,7 +40,7 @@ def test_delete_deck(tmp_path: Path, monkeypatch):
 
 def test_fetch_image_network_error(tmp_path: Path, monkeypatch):
     """fetch_image returns None on HTTP error."""
-    import mochi_tools_mcp.local.image_fetch as image_fetch_mod
+    import mochi_deckgen_mcp.local.image_fetch as image_fetch_mod
 
     def bad_get(url, **kwargs):
         raise httpx.ConnectError("refused")
@@ -57,7 +57,7 @@ def test_fetch_image_success(tmp_path: Path, monkeypatch):
 
     from PIL import Image
 
-    import mochi_tools_mcp.local.image_fetch as image_fetch_mod
+    import mochi_deckgen_mcp.local.image_fetch as image_fetch_mod
 
     buf = io.BytesIO()
     Image.new("RGB", (100, 100), color=(255, 0, 0)).save(buf, format="JPEG")
@@ -107,7 +107,7 @@ def test_check_malformed_all_cards(tmp_path: Path, monkeypatch):
 
 
 def test_fetch_wikipedia_image(tmp_path: Path, monkeypatch):
-    import mochi_tools_mcp.local.image_wikipedia as wiki_mod
+    import mochi_deckgen_mcp.local.image_wikipedia as wiki_mod
 
     monkeypatch.setattr(wiki_mod, "fetch_wikipedia_image", lambda query, dest: None)
     tools = _tools(tmp_path, monkeypatch)
